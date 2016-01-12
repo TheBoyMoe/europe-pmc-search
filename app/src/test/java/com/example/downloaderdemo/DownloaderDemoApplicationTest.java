@@ -2,6 +2,7 @@ package com.example.downloaderdemo;
 
 import android.os.Build;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricGradleTestRunner;
@@ -13,9 +14,22 @@ import static org.junit.Assert.assertNotNull;
 @Config(constants = BuildConfig.class, sdk = Build.VERSION_CODES.LOLLIPOP)
 public class DownloaderDemoApplicationTest {
 
+
+    private DownloaderDemoApplication mApplication;
+
+    @Before
+    public void setUp() throws Exception {
+        mApplication = DownloaderDemoApplication.getInstance();
+    }
+
     @Test
     public void shouldNotBeNull() throws Exception {
-        assertNotNull(DownloaderDemoApplication.getInstance());
+        assertNotNull(mApplication);
+    }
+
+    @Test
+    public void shouldHaveBus() throws Exception {
+        assertNotNull(mApplication.getBus());
 
     }
 }
