@@ -83,13 +83,7 @@ public class DownloadFragment extends BaseFragment{
 
             // populate the viewholder
             Journal journal = mJournals.get(position);
-            holder.articleTitle.setText(journal.getTitle());
-            holder.journalTitle.setText(journal.getJournalTitle());
-            holder.articleAuthors.setText(journal.getAuthorString());
-            holder.pageInformation.setText(journal.getPageInfo());
-            holder.journalIssue.setText(journal.getJournalIssn());
-            holder.journalVolume.setText(journal.getJournalVolume());
-            holder.publicationYear.setText(journal.getPubType());
+            holder.bindJournal(journal);
         }
 
         @Override
@@ -101,6 +95,8 @@ public class DownloadFragment extends BaseFragment{
 
 
     private class JournalViewHolder extends RecyclerView.ViewHolder{
+
+        private Journal mJournal;
 
         TextView articleTitle = null;
         TextView journalTitle = null;
@@ -120,6 +116,19 @@ public class DownloadFragment extends BaseFragment{
             journalIssue = (TextView) view.findViewById(R.id.journal_issue);
             journalVolume = (TextView) view.findViewById(R.id.journal_volume);
             publicationYear = (TextView) view.findViewById(R.id.publication_year);
+        }
+
+
+        public void bindJournal(Journal journal) {
+            mJournal = journal;
+            articleTitle.setText(mJournal.getTitle());
+            journalTitle.setText(mJournal.getJournalTitle());
+            articleAuthors.setText(mJournal.getAuthorString());
+            pageInformation.setText(mJournal.getPageInfo());
+            journalIssue.setText(mJournal.getJournalIssn());
+            journalVolume.setText(mJournal.getJournalVolume());
+            publicationYear.setText(mJournal.getPubYear());
+
         }
 
     }

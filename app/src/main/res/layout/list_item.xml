@@ -51,6 +51,8 @@
 
             <TextView
                 android:id="@+id/page_information"
+                android:paddingLeft="@dimen/dimen_xsmall"
+                android:paddingStart="@dimen/dimen_xsmall"
                 tools:text="110-24"
                 android:singleLine="true"
                 android:layout_width="wrap_content"
@@ -73,6 +75,8 @@
 
             <TextView
                 android:id="@+id/journal_issue"
+                android:paddingLeft="@dimen/dimen_xsmall"
+                android:paddingStart="@dimen/dimen_xsmall"
                 tools:text="12"
                 android:singleLine="true"
                 android:layout_width="wrap_content"
@@ -95,6 +99,8 @@
 
             <TextView
                 android:id="@+id/journal_volume"
+                android:paddingLeft="@dimen/dimen_xsmall"
+                android:paddingStart="@dimen/dimen_xsmall"
                 tools:text="131"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
