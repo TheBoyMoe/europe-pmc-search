@@ -2,7 +2,9 @@ package com.example.downloaderdemo.fragment;
 
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -19,11 +21,16 @@ import com.squareup.otto.Subscribe;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * References:
+ * [1] https://guides.codepath.com/android/Implementing-Pull-to-Refresh-Guide
+ * [2] http://antonioleiva.com/swiperefreshlayout/
+ */
 public class DownloadFragment extends BaseFragment{
 
     private ArrayList<Journal> mJournalItems = new ArrayList<>();
-    private RecyclerView mRecyclerView;
     private JournalAdapter mAdapter;
+    private SwipeRefreshLayout mRefreshContainer;
 
     public DownloadFragment() { }
 
@@ -37,13 +44,36 @@ public class DownloadFragment extends BaseFragment{
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        mRecyclerView = (RecyclerView) inflater.inflate(R.layout.recycler_view, container, false);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        View view = inflater.inflate(R.layout.recycler_view, container, false);
 
+        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mAdapter = new JournalAdapter(mJournalItems);
-        mRecyclerView.setAdapter(mAdapter);
+        recyclerView.setAdapter(mAdapter);
 
-        return mRecyclerView;
+        mRefreshContainer = (SwipeRefreshLayout) view.findViewById(R.id.refresh_container);
+        mRefreshContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                // TODO impl data download
+
+                // simulate downloading data before removing the refresh icon
+                new Handler().postDelayed(new Runnable() {
+                    @Override public void run() {
+                        mRefreshContainer.setRefreshing(false);
+                    }
+                }, 5000);
+            }
+        });
+
+        // Configure the refreshing colors
+        mRefreshContainer.setColorSchemeResources(
+                android.R.color.holo_blue_bright,
+                android.R.color.holo_green_light,
+                android.R.color.holo_orange_light,
+                android.R.color.holo_red_light);
+
+        return view;
     }
 
 
@@ -91,6 +121,17 @@ public class DownloadFragment extends BaseFragment{
         public int getItemCount() {
             return mJournals.size();
         }
+
+        public void clearAll() {
+            mJournalItems.clear();
+            notifyDataSetChanged();
+        }
+
+        public void addAll(List<Journal> items) {
+            mJournalItems.addAll(items);
+            notifyDataSetChanged();
+        }
+
     }
 
 
