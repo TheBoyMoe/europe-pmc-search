@@ -3,6 +3,7 @@ package com.example.downloaderdemo;
 import android.app.Fragment;
 import android.os.Build;
 
+import com.example.downloaderdemo.fragment.DownloadFragment;
 import com.example.downloaderdemo.fragment.ModelFragment;
 import com.example.downloaderdemo.ui.MainActivity;
 
@@ -42,5 +43,12 @@ public class MainActivityTest {
             mActivity.getFragmentManager().findFragmentByTag(MainActivity.MODEL_FRAGMENT_TAG);
         assertNotNull(modelFragment);
         assertTrue(modelFragment instanceof ModelFragment);
+    }
+
+    @Test
+    public void shouldHaveDownloaderFragmentt() throws Exception {
+        Fragment downloadFragment = mActivity.getFragmentManager().findFragmentById(R.id.list_fragment_container);
+        assertNotNull(downloadFragment);
+        assertTrue(downloadFragment instanceof DownloadFragment);
     }
 }
