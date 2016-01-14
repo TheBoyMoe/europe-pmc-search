@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.downloaderdemo.R;
 import com.example.downloaderdemo.event.QueryEvent;
@@ -94,7 +95,7 @@ public class DownloadFragment extends BaseFragment{
 
 
 
-    private class JournalViewHolder extends RecyclerView.ViewHolder{
+    private class JournalViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
         private Journal mJournal;
 
@@ -109,6 +110,8 @@ public class DownloadFragment extends BaseFragment{
         public JournalViewHolder(View view) {
 
             super(view);
+            view.setOnClickListener(this);
+
             articleTitle = (TextView) view.findViewById(R.id.article_title);
             journalTitle = (TextView) view.findViewById(R.id.journal_title);
             articleAuthors = (TextView) view.findViewById(R.id.article_authors);
@@ -130,6 +133,12 @@ public class DownloadFragment extends BaseFragment{
             publicationYear.setText(mJournal.getPubYear());
 
         }
+
+        @Override
+        public void onClick(View view) {
+            Toast.makeText(getActivity(), articleTitle.getText().toString().substring(0, 24), Toast.LENGTH_SHORT).show();
+        }
+
 
     }
 
