@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               xmlns:tools="http://schemas.android.com/tools"
+              tools:ignore="RtlSymmetry"
               android:id="@+id/list_item"
               android:orientation="vertical"
               android:padding="@dimen/dimen_normal"
@@ -11,14 +12,12 @@
         android:id="@+id/article_title"
         tools:text="Anaemia and the secondary causes of consuming to many cakes"
         android:singleLine="true"
-        android:paddingBottom="@dimen/dimen_xsmall"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
     <TextView
         android:id="@+id/journal_title"
         android:paddingTop="@dimen/dimen_xsmall"
-        android:paddingBottom="@dimen/dimen_xsmall"
         tools:text="Journal of Biological Medicine"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
@@ -26,7 +25,6 @@
     <TextView
         android:id="@+id/article_authors"
         android:paddingTop="@dimen/dimen_xsmall"
-        android:paddingBottom="@dimen/dimen_small"
         tools:text="A. Samuels, T. Pipps, J.A. Brown, et al"
         android:singleLine="true"
         android:layout_width="match_parent"
@@ -46,7 +44,7 @@
             android:layout_height="wrap_content">
 
             <TextView
-                android:text="page: "
+                android:text="@string/page_info_label"
                 android:singleLine="true"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
@@ -68,7 +66,7 @@
             android:layout_height="wrap_content">
 
             <TextView
-                android:text="issue: "
+                android:text="@string/issue_label"
                 android:singleLine="true"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
@@ -90,7 +88,7 @@
             android:layout_height="wrap_content">
 
             <TextView
-                android:text="vol: "
+                android:text="@string/volume_label"
                 android:singleLine="true"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
@@ -104,28 +102,15 @@
 
         </LinearLayout>
 
-        <!--<LinearLayout-->
-            <!--android:orientation="horizontal"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content">-->
 
-            <!--<TextView-->
-                <!--android:text="Year: "-->
-                <!--android:singleLine="true"-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="wrap_content"/>-->
-
-            <TextView
-                android:id="@+id/publication_year"
-                android:paddingLeft="@dimen/dimen_normal"
-                android:paddingStart="@dimen/dimen_normal"
-                tools:text="2014"
-                android:singleLine="true"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-
-
-        <!--</LinearLayout>-->
+        <TextView
+            android:id="@+id/publication_year"
+            android:paddingLeft="@dimen/dimen_normal"
+            android:paddingStart="@dimen/dimen_normal"
+            tools:text="2014"
+            android:singleLine="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
 
 
     </LinearLayout>
