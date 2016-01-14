@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Downloader Demo</string>
+    <string name="app_name">EuroPubMed Search Demo</string>
     <string name="volume_label">vol:</string>
     <string name="issue_label">issue:</string>
     <string name="page_info_label">page:</string>

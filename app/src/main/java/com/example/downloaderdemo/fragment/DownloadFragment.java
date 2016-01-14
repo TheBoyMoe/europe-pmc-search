@@ -3,14 +3,12 @@ package com.example.downloaderdemo.fragment;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.downloaderdemo.R;
 import com.example.downloaderdemo.event.QueryEvent;
@@ -18,11 +16,13 @@ import com.example.downloaderdemo.model.Journal;
 import com.squareup.otto.Subscribe;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class DownloadFragment extends BaseFragment{
 
-    private ArrayAdapter<Journal> mAdapter;
     private ArrayList<Journal> mJournalItems = new ArrayList<>();
+    private RecyclerView mRecyclerView;
+    private JournalAdapter mAdapter;
 
     public DownloadFragment() { }
 
@@ -35,28 +35,22 @@ public class DownloadFragment extends BaseFragment{
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        ListView listView = (ListView) inflater.inflate(R.layout.list_view, container, false);
 
-        // populate the adapter, bind to the listview & set the click listener
-        //mAdapter = new ArrayAdapter<>(getActivity(), R.layout.list_item, mJournalItems);
-        mAdapter = new CustomArrayAdapter(mJournalItems);
-        listView.setAdapter(mAdapter);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Journal journal = (Journal) parent.getItemAtPosition(position);
-                // FIXME throws NPE if title less than 24 chars
-                Toast.makeText(getActivity(), journal.toString().substring(0, 24), Toast.LENGTH_SHORT).show();
-            }
-        });
-        return listView;
+        mRecyclerView = (RecyclerView) inflater.inflate(R.layout.recycler_view, container, false);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+        mAdapter = new JournalAdapter(mJournalItems);
+        mRecyclerView.setAdapter(mAdapter);
+
+        return mRecyclerView;
     }
 
 
     @Subscribe
     public void getResultsOfSearchQuery(QueryEvent event) {
-        // add new results to the adapter to be displayed
-        mAdapter.addAll(event.getResultQuery().getResultList().getResult());
+        // add new results to the adapter
+        mJournalItems.addAll(event.getResultQuery().getResultList().getResult());
+        mAdapter.notifyDataSetChanged();
     }
 
     // populate the arraylist on device rotation
@@ -65,29 +59,30 @@ public class DownloadFragment extends BaseFragment{
     }
 
 
-    private class CustomArrayAdapter extends ArrayAdapter<Journal> {
+    private class JournalAdapter extends RecyclerView.Adapter<JournalViewHolder> {
 
-        public CustomArrayAdapter(ArrayList<Journal> items) {
-            super(getActivity(), 0, items);
+        private List<Journal> mJournals;
+
+        public JournalAdapter(List<Journal> items) {
+            mJournals = items;
+        }
+
+
+        @Override
+        public JournalViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+
+            // create the viewholder
+            LayoutInflater inflater = LayoutInflater.from(getActivity());
+            View view = inflater.inflate(R.layout.list_item, parent, false);
+
+            return new JournalViewHolder(view);
         }
 
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
+        public void onBindViewHolder(JournalViewHolder holder, int position) {
 
-            ViewHolder holder = null;
-            if(convertView == null) {
-                convertView = getActivity().getLayoutInflater().inflate(R.layout.list_item, null);
-                holder = (ViewHolder) convertView.getTag();
-            }
-
-            if(holder == null) {
-                holder = new ViewHolder(convertView);
-                convertView.setTag(holder);
-            }
-
-            // configure the view
-            Journal journal = getItem(position);
-
+            // populate the viewholder
+            Journal journal = mJournals.get(position);
             holder.articleTitle.setText(journal.getTitle());
             holder.journalTitle.setText(journal.getJournalTitle());
             holder.articleAuthors.setText(journal.getAuthorString());
@@ -95,14 +90,17 @@ public class DownloadFragment extends BaseFragment{
             holder.journalIssue.setText(journal.getJournalIssn());
             holder.journalVolume.setText(journal.getJournalVolume());
             holder.publicationYear.setText(journal.getPubType());
-
-            return convertView;
         }
 
-
+        @Override
+        public int getItemCount() {
+            return mJournals.size();
+        }
     }
 
-    private class ViewHolder {
+
+
+    private class JournalViewHolder extends RecyclerView.ViewHolder{
 
         TextView articleTitle = null;
         TextView journalTitle = null;
@@ -112,7 +110,9 @@ public class DownloadFragment extends BaseFragment{
         TextView journalVolume = null;
         TextView publicationYear = null;
 
-        ViewHolder(View view) {
+        public JournalViewHolder(View view) {
+
+            super(view);
             articleTitle = (TextView) view.findViewById(R.id.article_title);
             journalTitle = (TextView) view.findViewById(R.id.journal_title);
             articleAuthors = (TextView) view.findViewById(R.id.article_authors);
