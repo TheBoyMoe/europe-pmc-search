@@ -44,10 +44,10 @@ public class DownloadFragment extends BaseFragment{
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(getActivity(), "Position #" + position, Toast.LENGTH_SHORT).show();
+                Journal journal = (Journal) parent.getItemAtPosition(position);
+                Toast.makeText(getActivity(), journal.toString().substring(0, 32), Toast.LENGTH_SHORT).show();
             }
         });
-
         return listView;
     }
 
