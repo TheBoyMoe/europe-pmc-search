@@ -1,16 +1,14 @@
 package com.example.downloaderdemo.event;
 
-import com.example.downloaderdemo.model.ResultQuery;
-
 public class QueryEvent extends BaseEvent{
 
-    private ResultQuery mResultQuery;
+    private String mQuery;
 
-    public QueryEvent(ResultQuery resultQuery) {
-        mResultQuery = resultQuery;
+    public QueryEvent(String query) {
+        mQuery = query;
     }
 
-    public ResultQuery getResultQuery() {
-        return mResultQuery;
+    public String getQuery() {
+        return mQuery;
     }
 }

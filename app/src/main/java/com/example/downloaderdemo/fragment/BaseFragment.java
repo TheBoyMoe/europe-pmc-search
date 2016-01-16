@@ -1,6 +1,7 @@
 package com.example.downloaderdemo.fragment;
 
 import android.app.Fragment;
+import android.os.Bundle;
 
 import com.example.downloaderdemo.DownloaderDemoApplication;
 import com.example.downloaderdemo.event.BaseEvent;
@@ -15,14 +16,14 @@ public class BaseFragment extends Fragment{
     public BaseFragment() {}
 
     @Override
-    public void onResume() {
-        super.onResume();
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         getAppBus().register(this);
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
+    public void onDestroy() {
+        super.onDestroy();
         getAppBus().unregister(this);
     }
 
@@ -33,5 +34,9 @@ public class BaseFragment extends Fragment{
     protected void postToAppBus(BaseEvent event) {
         DownloaderDemoApplication.postToBus(event);
     }
+
+
+
+
 
 }

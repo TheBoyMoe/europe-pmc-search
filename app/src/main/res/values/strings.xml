@@ -3,4 +3,6 @@
     <string name="volume_label">vol:</string>
     <string name="issue_label">issue:</string>
     <string name="page_info_label">page:</string>
+    <string name="search_label">Search</string>
+    <string name="clear_search_label">Clear search</string>
 </resources>

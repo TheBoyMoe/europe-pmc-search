@@ -1,6 +1,5 @@
 package com.example.downloaderdemo.fragment;
 
-import android.app.Fragment;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -10,9 +9,11 @@ import android.view.ViewGroup;
 
 import com.example.downloaderdemo.DownloaderDemoApplication;
 import com.example.downloaderdemo.event.QueryEvent;
+import com.example.downloaderdemo.event.ResultQueryEvent;
 import com.example.downloaderdemo.model.Journal;
 import com.example.downloaderdemo.model.ResultQuery;
 import com.google.gson.Gson;
+import com.squareup.otto.Subscribe;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -29,33 +30,41 @@ import timber.log.Timber;
 /**
  * Headless fragment which maintains the state of the app
  */
-public class ModelFragment extends Fragment{
+public class ModelFragment extends BaseFragment{
 
     private boolean mIsStarted = false;
-    private List<Journal> mJournals = new ArrayList<>(); // data cache survives device rotation
+    private List<Journal> mJournals = new ArrayList<>();
 
     public ModelFragment() {}
+
+    public static ModelFragment newInstance() {
+        return new ModelFragment();
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
-
-        // execute the background thread
-        if(!mIsStarted) {
-            mIsStarted = true;
-            new DownloaderThread().start();
-        }
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        // headless fragment returns no view
         return null;
     }
 
-    public static ModelFragment newInstance() {
-        return new ModelFragment();
+
+    @Subscribe
+    public void getSearchQuery(QueryEvent event) {
+        String query = event.getQuery();
+        if(query != null && !query.isEmpty()) {
+            // execute the background thread
+            if(!mIsStarted) {
+                mIsStarted = true;
+                new DownloaderThread(query).start();
+            }
+        }
     }
 
 
@@ -65,6 +74,12 @@ public class ModelFragment extends Fragment{
 
 
     class DownloaderThread extends Thread {
+
+        private String query;
+
+        public DownloaderThread(String query) {
+            this.query = query;
+        }
 
         @Override
         public void run() {
@@ -76,7 +91,7 @@ public class ModelFragment extends Fragment{
                 String dataset = "fulltext";
                 String resultType = "core"; // returns full meta-data for the journal
                 String pageSize = "12"; // no. of records returned
-                String query = "anaemia";
+                //String query = "anaemia";
 
                 // uri constants
                 final String SEARCH_BASE_URL =
@@ -107,10 +122,12 @@ public class ModelFragment extends Fragment{
                     BufferedReader reader = new BufferedReader(new InputStreamReader(is));
 
                     ResultQuery resultQuery = new Gson().fromJson(reader, ResultQuery.class);
-                    DownloaderDemoApplication.postToBus(new QueryEvent(resultQuery)); // post new results
-                    mJournals.addAll(resultQuery.getResultList().getResult()); // ad to the cache
+                    DownloaderDemoApplication.postToBus(new ResultQueryEvent(resultQuery)); // post new results
+                    mJournals.clear();
+                    mJournals.addAll(resultQuery.getResultList().getResult()); // add to the cache
 
                     reader.close();
+                    mIsStarted = false;
 
                 } catch (MalformedURLException e) {
                     Timber.e("Failure building the url: %s", e.getMessage());
