@@ -1,8 +1,12 @@
 <resources>
-    <string name="app_name">EuroPubMed Search Demo</string>
+    <string name="app_name">Search EuroPMC Demo</string>
     <string name="volume_label">vol:</string>
     <string name="issue_label">issue:</string>
     <string name="page_info_label">page:</string>
+    <string name="article_authors_label">authors:</string>
     <string name="search_label">Search</string>
-    <string name="clear_search_label">Clear search</string>
+    <string name="clear_search_label">Clear history</string>
+    <string name="confirmation_dialog_message">Are you sure you want clear your search history?</string>
+    <string name="confirmation_dialog_positive_button">OK</string>
+    <string name="confirmation_dialog_negative_button">Cancel</string>
 </resources>
