@@ -45,7 +45,6 @@ public class DownloadFragment extends BaseFragment{
     private SearchRecentSuggestions mRecentSuggestions;
     private SearchView mSearchView;
     private MenuItem mSearchMenuItem;
-    private RecyclerView mRecyclerView;
     private JournalAdapter mAdapter;
 
     public DownloadFragment() { }
@@ -76,13 +75,13 @@ public class DownloadFragment extends BaseFragment{
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        mRecyclerView = (RecyclerView) inflater.inflate(R.layout.recycler_view, container, false);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        RecyclerView recyclerView = (RecyclerView) inflater.inflate(R.layout.recycler_view, container, false);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         mAdapter = new JournalAdapter(mJournalItems);
-        mRecyclerView.setAdapter(mAdapter);
+        recyclerView.setAdapter(mAdapter);
 
-        return mRecyclerView;
+        return recyclerView;
     }
 
     @Override
