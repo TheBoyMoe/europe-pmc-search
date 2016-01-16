@@ -21,7 +21,6 @@ import com.example.downloaderdemo.R;
 import com.example.downloaderdemo.event.QueryEvent;
 import com.example.downloaderdemo.event.ResultQueryEvent;
 import com.example.downloaderdemo.model.Journal;
-import com.example.downloaderdemo.util.ConfirmationDialogFragment;
 import com.example.downloaderdemo.util.QueryPreferences;
 import com.example.downloaderdemo.util.QuerySuggestionProvider;
 import com.example.downloaderdemo.util.Utils;
@@ -68,7 +67,7 @@ public class DownloadFragment extends BaseFragment{
             if(query != null) {
                 postToAppBus(new QueryEvent(query));
             } else {
-                Utils.showToast(getActivity(), "Enter a search query");
+                Utils.showSnackbar(getActivity().findViewById(R.id.coordinator_layout), "Enter a search query");
             }
         }
     }
@@ -138,11 +137,11 @@ public class DownloadFragment extends BaseFragment{
 
             // clear user's search history
             if(mRecentSuggestions != null) {
-                ConfirmationDialogFragment dialog = new ConfirmationDialogFragment();
+                ConfirmationDialogFragment dialog = ConfirmationDialogFragment.newInstance();
                 dialog.addSuggestionsToDialog(mRecentSuggestions);
                 dialog.show(getFragmentManager(), "Clear history");
             } else {
-                Utils.showToast(getActivity(), "History cleared");
+                Utils.showSnackbar(getActivity().findViewById(R.id.coordinator_layout), "History cleared");
             }
             return true;
         }

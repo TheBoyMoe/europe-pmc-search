@@ -1,4 +1,4 @@
-package com.example.downloaderdemo.util;
+package com.example.downloaderdemo.fragment;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -8,13 +8,13 @@ import android.os.Bundle;
 import android.provider.SearchRecentSuggestions;
 
 import com.example.downloaderdemo.R;
+import com.example.downloaderdemo.util.Utils;
 
 public class ConfirmationDialogFragment extends DialogFragment{
 
     private SearchRecentSuggestions mSearchRecentSuggestions;
 
     public ConfirmationDialogFragment() {}
-
 
     public static ConfirmationDialogFragment newInstance() {
         return new ConfirmationDialogFragment();
@@ -35,14 +35,14 @@ public class ConfirmationDialogFragment extends DialogFragment{
                            public void onClick(DialogInterface dialogInterface, int i) {
                                mSearchRecentSuggestions.clearHistory();
                                mSearchRecentSuggestions = null;
-                               Utils.showToast(getActivity(), "Search history cleared");
+                               Utils.showSnackbar(getActivity().findViewById(R.id.coordinator_layout), "Search history cleared");
                            }
                        })
                .setNegativeButton(R.string.confirmation_dialog_negative_button,
                        new DialogInterface.OnClickListener() {
                            @Override
                            public void onClick(DialogInterface dialogInterface, int i) {
-                               Utils.showToast(getActivity(), "Action cancelled");
+                               Utils.showSnackbar(getActivity().findViewById(R.id.coordinator_layout), "Action cancelled");
                            }
                        });
 
