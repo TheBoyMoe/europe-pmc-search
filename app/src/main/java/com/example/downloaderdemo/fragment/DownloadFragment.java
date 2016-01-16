@@ -1,7 +1,10 @@
 package com.example.downloaderdemo.fragment;
 
 
+import android.app.SearchManager;
+import android.content.Context;
 import android.os.Bundle;
+import android.provider.SearchRecentSuggestions;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -13,13 +16,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.downloaderdemo.R;
 import com.example.downloaderdemo.event.QueryEvent;
 import com.example.downloaderdemo.event.ResultQueryEvent;
 import com.example.downloaderdemo.model.Journal;
+import com.example.downloaderdemo.util.ConfirmationDialogFragment;
 import com.example.downloaderdemo.util.QueryPreferences;
+import com.example.downloaderdemo.util.QuerySuggestionProvider;
+import com.example.downloaderdemo.util.Utils;
 import com.squareup.otto.Subscribe;
 
 import java.util.ArrayList;
@@ -31,10 +36,16 @@ import timber.log.Timber;
  * References:
  * [1] https://www.safaribooksonline.com/library/view/android-programming-the/9780134171517/ch25s02.html (SearchView setup)
  * [2] https://www.safaribooksonline.com/library/view/android-programming-the/9780134171517/ch25s03.html (Save query to shared prefs)
+ * [3] https://developer.android.com/training/search/setup.html
+ * [4] http://antonioleiva.com/actionbarcompat-action-views/
+ * [5] http://developer.android.com/guide/topics/search/adding-recent-query-suggestions.html
  */
 public class DownloadFragment extends BaseFragment{
 
     private ArrayList<Journal> mJournalItems = new ArrayList<>();
+    private SearchRecentSuggestions mRecentSuggestions;
+    private SearchView mSearchView;
+    private MenuItem mSearchMenuItem;
     private RecyclerView mRecyclerView;
     private JournalAdapter mAdapter;
 
@@ -57,7 +68,7 @@ public class DownloadFragment extends BaseFragment{
             if(query != null) {
                 postToAppBus(new QueryEvent(query));
             } else {
-                Toast.makeText(getActivity(), "Enter a search query", Toast.LENGTH_SHORT).show();
+                Utils.showToast(getActivity(), "Enter a search query");
             }
         }
     }
@@ -81,30 +92,58 @@ public class DownloadFragment extends BaseFragment{
         inflater.inflate(R.menu.menu_search, menu);
 
         // configure search view
-        MenuItem searchItem = menu.findItem(R.id.search_view);
-        SearchView searchView = (SearchView) searchItem.getActionView();
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+        SearchManager mgr = (SearchManager) getActivity().getSystemService(Context.SEARCH_SERVICE);
+        mSearchMenuItem = menu.findItem(R.id.search_view);
+        mSearchView = (SearchView) mSearchMenuItem.getActionView();
+        mSearchView.setSearchableInfo(mgr.getSearchableInfo(getActivity().getComponentName()));
+        mSearchView.setSubmitButtonEnabled(true);
+        mSearchView.setQueryRefinementEnabled(true);
+        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
+                // hide the soft keyboard
+                Utils.hideKeyboard(getActivity(), mSearchView.getWindowToken());
+
+                // close the search view
+                mSearchMenuItem.collapseActionView();
+
+                // save the search query to the RecentSuggestionsProvider
+                mRecentSuggestions = new SearchRecentSuggestions(getActivity(),
+                        QuerySuggestionProvider.AUTHORITY, QuerySuggestionProvider.MODE);
+                mRecentSuggestions.saveRecentQuery(query, null);
+
                 // post the query submitted by the user to the bus and save it to shared prefs
                 postToAppBus(new QueryEvent(query));
                 QueryPreferences.setSavedQueryString(getActivity(), query);
+
                 return true;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
+                // no-op
                 return false;
             }
         });
+
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if(item.getItemId() == R.id.clear_search) {
+
             // clear the saved query from shared prefs
             QueryPreferences.setSavedQueryString(getActivity(), null);
             Timber.i("Cleared shared prefs");
+
+            // clear user's search history
+            if(mRecentSuggestions != null) {
+                ConfirmationDialogFragment dialog = new ConfirmationDialogFragment();
+                dialog.addSuggestionsToDialog(mRecentSuggestions);
+                dialog.show(getFragmentManager(), "Clear history");
+            } else {
+                Utils.showToast(getActivity(), "History cleared");
+            }
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -199,7 +238,7 @@ public class DownloadFragment extends BaseFragment{
 
         @Override
         public void onClick(View view) {
-            Toast.makeText(getActivity(), articleTitle.getText().toString().substring(0, 24), Toast.LENGTH_SHORT).show();
+            Utils.showToast(getActivity(), articleTitle.getText().toString().substring(0, 24));
         }
 
 
