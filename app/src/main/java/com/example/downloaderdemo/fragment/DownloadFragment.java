@@ -75,14 +75,13 @@ public class DownloadFragment extends BaseFragment{
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.recycler_view, container, false);
-
-        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
+        RecyclerView recyclerView = (RecyclerView) inflater.inflate(R.layout.recycler_view, container, false);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
         mAdapter = new JournalAdapter(mJournalItems);
         recyclerView.setAdapter(mAdapter);
 
-        return view;
+        return recyclerView;
     }
 
     @Override
