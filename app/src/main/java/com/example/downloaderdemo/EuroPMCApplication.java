@@ -9,15 +9,15 @@ import com.squareup.otto.Bus;
 
 import timber.log.Timber;
 
-public class DownloaderDemoApplication extends Application{
+public class EuroPMCApplication extends Application{
 
 
-    private static DownloaderDemoApplication sInstance;
+    private static EuroPMCApplication sInstance;
     private static Bus sBus;
 
-    public static DownloaderDemoApplication getInstance() {
+    public static EuroPMCApplication getInstance() {
         if(sInstance == null) {
-            sInstance = new DownloaderDemoApplication();
+            sInstance = new EuroPMCApplication();
             sBus = new AndroidBus();
         }
         return sInstance;

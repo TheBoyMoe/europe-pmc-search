@@ -7,7 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.example.downloaderdemo.DownloaderDemoApplication;
+import com.example.downloaderdemo.EuroPMCApplication;
 import com.example.downloaderdemo.event.QueryEvent;
 import com.example.downloaderdemo.event.ResultQueryEvent;
 import com.example.downloaderdemo.model.Journal;
@@ -34,6 +34,8 @@ public class ModelFragment extends BaseFragment{
 
     private boolean mIsStarted = false;
     private List<Journal> mJournals = new ArrayList<>();
+    private String mQuery;
+    private String mCurrentPage;
 
     public ModelFragment() {}
 
@@ -57,12 +59,23 @@ public class ModelFragment extends BaseFragment{
 
     @Subscribe
     public void getSearchQuery(QueryEvent event) {
-        String query = event.getQuery();
-        if(query != null && !query.isEmpty()) {
+
+        if(mQuery != null && event.getQuery() != null) {
+            if(!mQuery.equals(event.getQuery())) {
+                // new query is received
+                mJournals.clear();
+            }
+        }
+        mQuery = event.getQuery();
+        mCurrentPage = String.valueOf(event.getPageNumber());
+        Timber.i("Received event: query: %s, current page: %s, cache size %d",
+                            mQuery, mCurrentPage, mJournals.size());
+
+        if(mQuery != null && !mQuery.isEmpty()) {
             // execute the background thread
             if(!mIsStarted) {
                 mIsStarted = true;
-                new DownloaderThread(query).start();
+                new DownloaderThread().start();
             }
         }
     }
@@ -75,11 +88,7 @@ public class ModelFragment extends BaseFragment{
 
     class DownloaderThread extends Thread {
 
-        private String query;
-
-        public DownloaderThread(String query) {
-            this.query = query;
-        }
+        public DownloaderThread() { }
 
         @Override
         public void run() {
@@ -87,10 +96,10 @@ public class ModelFragment extends BaseFragment{
 
                 // uri parameters
                 String format = "json"; // json, xml, dc
-                String page = "1"; // first page
                 String dataset = "fulltext";
                 String resultType = "core"; // returns full meta-data for the journal
                 String pageSize = "12"; // no. of records returned
+                //String page = "1"; // first page
                 //String query = "anaemia";
 
                 // uri constants
@@ -104,11 +113,11 @@ public class ModelFragment extends BaseFragment{
                 final String PAGE_SIZE = "pageSize";
 
                 Uri uri = Uri.parse(SEARCH_BASE_URL).buildUpon()
-                        .appendQueryParameter(QUERY_PARAM, query)
+                        .appendQueryParameter(QUERY_PARAM, mQuery)
+                        .appendQueryParameter(PAGE_PARAM, mCurrentPage)
+                        .appendQueryParameter(PAGE_SIZE, pageSize)
                         .appendQueryParameter(RESULT_TYPE_PARAM, resultType)
                         .appendQueryParameter(DATA_SET_PARAM, dataset)
-                        .appendQueryParameter(PAGE_PARAM, page)
-                        .appendQueryParameter(PAGE_SIZE, pageSize)
                         .appendQueryParameter(FORMAT_PARAM, format)
                         .build();
 
@@ -122,9 +131,11 @@ public class ModelFragment extends BaseFragment{
                     BufferedReader reader = new BufferedReader(new InputStreamReader(is));
 
                     ResultQuery resultQuery = new Gson().fromJson(reader, ResultQuery.class);
-                    DownloaderDemoApplication.postToBus(new ResultQueryEvent(resultQuery)); // post new results
-                    mJournals.clear();
+                    EuroPMCApplication.postToBus(new ResultQueryEvent(resultQuery)); // post new results
+                    //mJournals.clear();
+                    // TODO take the current list and add to it
                     mJournals.addAll(resultQuery.getResultList().getResult()); // add to the cache
+                    Timber.i("Cache size %d", mJournals.size());
 
                     reader.close();
                     mIsStarted = false;

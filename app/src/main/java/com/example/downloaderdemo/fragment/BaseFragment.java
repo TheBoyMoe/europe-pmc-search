@@ -3,7 +3,7 @@ package com.example.downloaderdemo.fragment;
 import android.app.Fragment;
 import android.os.Bundle;
 
-import com.example.downloaderdemo.DownloaderDemoApplication;
+import com.example.downloaderdemo.EuroPMCApplication;
 import com.example.downloaderdemo.event.BaseEvent;
 import com.squareup.otto.Bus;
 
@@ -28,11 +28,11 @@ public class BaseFragment extends Fragment{
     }
 
     protected Bus getAppBus() {
-        return DownloaderDemoApplication.getInstance().getBus();
+        return EuroPMCApplication.getInstance().getBus();
     }
 
     protected void postToAppBus(BaseEvent event) {
-        DownloaderDemoApplication.postToBus(event);
+        EuroPMCApplication.postToBus(event);
     }
 
 

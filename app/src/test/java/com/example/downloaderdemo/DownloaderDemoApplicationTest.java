@@ -15,11 +15,11 @@ import static org.junit.Assert.assertNotNull;
 public class DownloaderDemoApplicationTest {
 
 
-    private DownloaderDemoApplication mApplication;
+    private EuroPMCApplication mApplication;
 
     @Before
     public void setUp() throws Exception {
-        mApplication = DownloaderDemoApplication.getInstance();
+        mApplication = EuroPMCApplication.getInstance();
     }
 
     @Test

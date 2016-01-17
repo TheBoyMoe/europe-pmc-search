@@ -33,22 +33,46 @@ import timber.log.Timber;
 
 /**
  * References:
+ *
+ * RecyclerView
  * [1] https://www.safaribooksonline.com/library/view/android-programming-the/9780134171517/ch25s02.html (SearchView setup)
  * [2] https://www.safaribooksonline.com/library/view/android-programming-the/9780134171517/ch25s03.html (Save query to shared prefs)
+ *
+ * SearchView
  * [3] https://developer.android.com/training/search/setup.html
  * [4] http://antonioleiva.com/actionbarcompat-action-views/
  * [5] http://developer.android.com/guide/topics/search/adding-recent-query-suggestions.html
+ *
+ * Endless scrolling on a RecyclerView
+ * [4] http://stackoverflow.com/questions/26543131/how-to-implement-endless-list-with-recyclerview
+ * [5] http://androhub.com/load-more-items-on-scroll-android/
+ *
  */
+
 public class DownloadFragment extends BaseFragment{
+
+    private static final String SAVED_CURRENT_PAGE = "current page";
+    private static final String SAVED_LOADING = "loading";
+    private static final String SAVED_QUERY = "query";
 
     private ArrayList<Journal> mJournalItems = new ArrayList<>();
     private SearchRecentSuggestions mRecentSuggestions;
     private SearchView mSearchView;
     private MenuItem mSearchMenuItem;
     private JournalAdapter mAdapter;
+    private RecyclerView mRecyclerView;
+    private TextView mEmptyView;
+    private LinearLayoutManager mLayoutManager;
+    private String mQuery;
+    private View mView;
+    private boolean mNewQuerySubmitted;
+
+    // endless scrolling variables
+    private boolean mLoading = true;
+    private int mPreviousTotal, mVisibleThreshold = 5, mFirstVisibleItem, mVisibleItemCount,
+                    mTotalItemCount, mCurrentPage;
 
     public DownloadFragment() { }
-
 
     public static DownloadFragment newInstance() {
         return new DownloadFragment();
@@ -58,30 +82,79 @@ public class DownloadFragment extends BaseFragment{
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-
-        if(savedInstanceState == null) {
-            // execute the last saved query
-            String query = QueryPreferences.getSavedQueryString(getActivity());
-            Timber.i("First time in, retrieving query: %s from shared prefs", query);
-            if(query != null) {
-                postToAppBus(new QueryEvent(query));
-            } else {
-                Utils.showSnackbar(getActivity().findViewById(R.id.coordinator_layout), "Enter a search query");
-            }
-        }
     }
+
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        RecyclerView recyclerView = (RecyclerView) inflater.inflate(R.layout.recycler_view, container, false);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        // RecyclerView recyclerView = (RecyclerView) inflater.inflate(R.layout.recycler_view, container, false);
+        mView = inflater.inflate(R.layout.recycler_view, container, false);
+        mEmptyView = (TextView) mView.findViewById(R.id.empty_view);
+        mRecyclerView = (RecyclerView) mView.findViewById(R.id.recycler_view);
+
+        mLayoutManager = new LinearLayoutManager(getActivity());
+        mRecyclerView.setLayoutManager(mLayoutManager);
 
         mAdapter = new JournalAdapter(mJournalItems);
-        recyclerView.setAdapter(mAdapter);
+        mRecyclerView.setAdapter(mAdapter);
 
-        return recyclerView;
+        if(savedInstanceState == null) {
+            mCurrentPage = 1;
+            mLoading = false;
+            // execute the last saved query
+            mQuery = QueryPreferences.getSavedQueryString(getActivity());
+            Timber.i("First time in, retrieving query: %s from shared prefs", mQuery);
+            if(mQuery != null) {
+                postToAppBus(new QueryEvent(mQuery, mCurrentPage));
+            } else {
+                mEmptyView.setText(R.string.empty_view_label);
+                mEmptyView.setVisibility(View.VISIBLE);
+                mRecyclerView.setVisibility(View.GONE);
+                Utils.showSnackbar(getActivity().findViewById(R.id.coordinator_layout), "Enter a search query");
+            }
+        } else {
+            // re-set fragment state
+            mCurrentPage = savedInstanceState.getInt(SAVED_CURRENT_PAGE);
+            mLoading = savedInstanceState.getBoolean(SAVED_LOADING);
+            mQuery = savedInstanceState.getString(SAVED_QUERY);
+        }
+
+
+        // implement endless scrolling
+        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                mVisibleItemCount = recyclerView.getChildCount();
+                mTotalItemCount = mLayoutManager.getItemCount();
+                mFirstVisibleItem = mLayoutManager.findFirstVisibleItemPosition();
+
+                if(mLoading) {
+                    if(mTotalItemCount > mPreviousTotal) {
+                        mLoading = false;
+                        mPreviousTotal = mTotalItemCount;
+                    }
+                }
+                if(!mLoading && (mTotalItemCount - mVisibleItemCount)
+                        <= (mFirstVisibleItem  + mVisibleThreshold)) {
+                    // end of page has been reached, download more items
+                    mLoading = true;
+                    postToAppBus(new QueryEvent(mQuery, mCurrentPage));
+                }
+            }
+        });
+
+        return mView;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(SAVED_CURRENT_PAGE, mCurrentPage);
+        outState.putBoolean(SAVED_LOADING, mLoading);
+        outState.putString(SAVED_QUERY, mQuery);
     }
 
     @Override
@@ -99,6 +172,15 @@ public class DownloadFragment extends BaseFragment{
         mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
+                if(mQuery != null && !mQuery.equals(query)) {
+                    // new query has been submitted
+                    mNewQuerySubmitted = true;
+                }
+                mQuery = query;
+
+                // reset the page number
+                mCurrentPage = 1;
+
                 // hide the soft keyboard
                 Utils.hideKeyboard(getActivity(), mSearchView.getWindowToken());
 
@@ -108,11 +190,11 @@ public class DownloadFragment extends BaseFragment{
                 // save the search query to the RecentSuggestionsProvider
                 mRecentSuggestions = new SearchRecentSuggestions(getActivity(),
                         QuerySuggestionProvider.AUTHORITY, QuerySuggestionProvider.MODE);
-                mRecentSuggestions.saveRecentQuery(query, null);
+                mRecentSuggestions.saveRecentQuery(mQuery, null);
 
                 // post the query submitted by the user to the bus and save it to shared prefs
-                postToAppBus(new QueryEvent(query));
-                QueryPreferences.setSavedQueryString(getActivity(), query);
+                postToAppBus(new QueryEvent(mQuery, mCurrentPage));
+                QueryPreferences.setSavedQueryString(getActivity(), mQuery);
 
                 return true;
             }
@@ -140,7 +222,7 @@ public class DownloadFragment extends BaseFragment{
                 dialog.addSuggestionsToDialog(mRecentSuggestions);
                 dialog.show(getFragmentManager(), "Clear history");
             } else {
-                Utils.showSnackbar(getActivity().findViewById(R.id.coordinator_layout), "History cleared");
+                Utils.showSnackbar(mView, "History cleared");
             }
             return true;
         }
@@ -149,11 +231,23 @@ public class DownloadFragment extends BaseFragment{
 
     @Subscribe
     public void getResultsOfSearchQuery(ResultQueryEvent event) {
+        // clear the arraylist if a new query has been submitted
+        if(mNewQuerySubmitted) {
+            mNewQuerySubmitted = false;
+            mJournalItems.clear();
+            mPreviousTotal = 0;
+        }
         // add new results to the adapter
-        mJournalItems.clear();
         mJournalItems.addAll(event.getResultQuery().getResultList().getResult());
         mAdapter.notifyDataSetChanged();
+        mRecyclerView.setVisibility(View.VISIBLE);
+        mEmptyView.setVisibility(View.GONE);
+        if(mCurrentPage > 1) {
+            Utils.showSnackbar(mView, "Downloading more items");
+        }
+        ++mCurrentPage;
     }
+
 
     // populate the arraylist on device rotation
     public void setModelDataSet(ArrayList<Journal> list) {
