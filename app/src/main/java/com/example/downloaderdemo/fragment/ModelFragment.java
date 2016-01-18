@@ -12,6 +12,7 @@ import com.example.downloaderdemo.event.QueryEvent;
 import com.example.downloaderdemo.event.ResultQueryEvent;
 import com.example.downloaderdemo.model.Journal;
 import com.example.downloaderdemo.model.ResultQuery;
+import com.example.downloaderdemo.util.Utils;
 import com.google.gson.Gson;
 import com.squareup.otto.Subscribe;
 
@@ -99,8 +100,6 @@ public class ModelFragment extends BaseFragment{
                 String dataset = "fulltext";
                 String resultType = "core"; // returns full meta-data for the journal
                 String pageSize = "12"; // no. of records returned
-                //String page = "1"; // first page
-                //String query = "anaemia";
 
                 // uri constants
                 final String SEARCH_BASE_URL =

@@ -2,6 +2,8 @@ package com.example.downloaderdemo.util;
 
 import android.app.Activity;
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.IBinder;
 import android.support.design.widget.Snackbar;
 import android.view.View;
@@ -29,5 +31,15 @@ public class Utils {
     public static void showSnackbar(View view, String message) {
         Snackbar.make(view, message, Snackbar.LENGTH_LONG).show();
     }
+
+    // Check that a connection is available
+    public  static boolean isClientConnected(Context context) {
+
+        ConnectivityManager cm = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+
+        return  activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+    }
+
 
 }

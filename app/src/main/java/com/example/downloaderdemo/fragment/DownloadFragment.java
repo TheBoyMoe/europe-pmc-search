@@ -110,7 +110,7 @@ public class DownloadFragment extends BaseFragment{
             // execute the last saved query
             mQuery = QueryPreferences.getSavedQueryString(getActivity());
             if(mQuery != null) {
-                postToAppBus(new QueryEvent(mQuery, mCurrentPage));
+                getSearchResults(); // execute search in background thread
             } else {
                 Utils.showSnackbar(getActivity().findViewById(R.id.coordinator_layout), "Enter a search query");
             }
@@ -146,12 +146,22 @@ public class DownloadFragment extends BaseFragment{
                         <= (mFirstVisibleItem  + mVisibleThreshold)) {
                     // end of page has been reached, download more items
                     mLoading = true;
-                    postToAppBus(new QueryEvent(mQuery, mCurrentPage));
+                    getSearchResults();
+                    //postToAppBus(new QueryEvent(mQuery, mCurrentPage));
                 }
             }
         });
 
         return mView;
+    }
+
+    private void getSearchResults() {
+        if(Utils.isClientConnected(getActivity())) {
+            postToAppBus(new QueryEvent(mQuery, mCurrentPage));
+        } else {
+            Utils.showSnackbar(getActivity().findViewById(R.id.coordinator_layout), "No network connection");
+        }
+
     }
 
     @Override
@@ -177,7 +187,7 @@ public class DownloadFragment extends BaseFragment{
         mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                if(mQuery != null && !mQuery.equals(query)) {
+                if (mQuery != null && !mQuery.equals(query)) {
                     // new query has been submitted
                     mNewQuerySubmitted = true;
                 }
@@ -198,7 +208,8 @@ public class DownloadFragment extends BaseFragment{
                 sRecentSuggestions.saveRecentQuery(mQuery, null);
 
                 // post the query submitted by the user to the bus and save it to shared prefs
-                postToAppBus(new QueryEvent(mQuery, mCurrentPage));
+                //postToAppBus(new QueryEvent(mQuery, mCurrentPage));
+                getSearchResults();
                 QueryPreferences.setSavedQueryString(getActivity(), mQuery);
 
                 return true;
