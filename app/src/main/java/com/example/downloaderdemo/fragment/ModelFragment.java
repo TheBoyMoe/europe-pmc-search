@@ -87,6 +87,11 @@ public class ModelFragment extends BaseFragment{
     }
 
 
+    public Journal getJournal(int position) {
+        return mJournals.get(position);
+    }
+
+
     class DownloaderThread extends Thread {
 
         public DownloaderThread() { }

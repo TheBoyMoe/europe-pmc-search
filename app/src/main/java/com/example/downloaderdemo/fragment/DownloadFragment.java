@@ -22,6 +22,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.downloaderdemo.R;
+import com.example.downloaderdemo.event.OnListItemClickEvent;
 import com.example.downloaderdemo.event.QueryEvent;
 import com.example.downloaderdemo.event.ResultQueryEvent;
 import com.example.downloaderdemo.model.Journal;
@@ -365,7 +366,8 @@ public class DownloadFragment extends BaseFragment{
 
         @Override
         public void onClick(View view) {
-            Utils.showToast(getActivity(), articleTitle.getText().toString().substring(0, 24));
+            // post on click event to the bus
+            postToAppBus(new OnListItemClickEvent(mJournal));
         }
 
 

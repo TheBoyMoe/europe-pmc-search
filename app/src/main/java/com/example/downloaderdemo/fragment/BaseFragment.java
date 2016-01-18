@@ -35,8 +35,4 @@ public class BaseFragment extends Fragment{
         EuroPMCApplication.postToBus(event);
     }
 
-
-
-
-
 }

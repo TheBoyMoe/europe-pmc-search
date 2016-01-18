@@ -1,16 +1,26 @@
 package com.example.downloaderdemo.ui;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
 
+import com.example.downloaderdemo.EuroPMCApplication;
 import com.example.downloaderdemo.R;
+import com.example.downloaderdemo.event.OnListItemClickEvent;
+import com.example.downloaderdemo.fragment.DetailFragment;
 import com.example.downloaderdemo.fragment.DownloadFragment;
 import com.example.downloaderdemo.fragment.ModelFragment;
+import com.example.downloaderdemo.model.Journal;
+import com.squareup.otto.Subscribe;
+
+import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity {
 
     public static final String MODEL_FRAGMENT_TAG = "model_fragment";
+    private boolean mDualPane;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,5 +49,42 @@ public class MainActivity extends AppCompatActivity {
         if(downloadFragment != null && modelFragment != null)
             downloadFragment.setModelDataSet(modelFragment.getModel());
 
+        // determine if there is a frame in which to embed the detail fragment, eg on tablet
+        View detailPane = findViewById(R.id.detail_fragment_container);
+        mDualPane = detailPane != null && detailPane.getVisibility() == View.VISIBLE;
+
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        EuroPMCApplication.getInstance().getBus().register(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        EuroPMCApplication.getInstance().getBus().unregister(this);
+    }
+
+    // handle list item clicks
+    @Subscribe
+    public void onListItemClickEvent(OnListItemClickEvent event) {
+        Journal journal = event.getJournal();
+        if(journal != null) {
+            // on tablets
+            if(mDualPane) {
+                // swap the current fragment
+                getFragmentManager().beginTransaction()
+                        .replace(R.id.detail_fragment_container, DetailFragment.newInstance(journal))
+                        .commit();
+            } else {
+                // on phones
+                Intent intent = new Intent(this, DetailActivity.class);
+                intent.putExtra(DetailFragment.JOURNAL_ITEM, journal);
+                startActivity(intent);
+            }
+        }
+    }
+
 }
