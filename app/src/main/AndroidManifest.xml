@@ -27,8 +27,7 @@
         <!-- QuerySuggestionProvider -->
         <provider
             android:authorities="com.example.downloaderdemo.util.QuerySuggestionProvider"
-            android:name="com.example.downloaderdemo.util.QuerySuggestionProvider"
-            android:exported="false"/>
+            android:name="com.example.downloaderdemo.util.QuerySuggestionProvider"/>
 
     </application>
 

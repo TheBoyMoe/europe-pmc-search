@@ -132,10 +132,9 @@ public class ModelFragment extends BaseFragment{
 
                     ResultQuery resultQuery = new Gson().fromJson(reader, ResultQuery.class);
                     EuroPMCApplication.postToBus(new ResultQueryEvent(resultQuery)); // post new results
-                    //mJournals.clear();
-                    // TODO take the current list and add to it
+
+                    // add the results to the current journal list
                     mJournals.addAll(resultQuery.getResultList().getResult()); // add to the cache
-                    Timber.i("Cache size %d", mJournals.size());
 
                     reader.close();
                     mIsStarted = false;

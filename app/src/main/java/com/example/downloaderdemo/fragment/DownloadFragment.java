@@ -1,8 +1,12 @@
 package com.example.downloaderdemo.fragment;
 
 
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.provider.SearchRecentSuggestions;
 import android.support.annotation.Nullable;
@@ -56,7 +60,7 @@ public class DownloadFragment extends BaseFragment{
     private static final String SAVED_QUERY = "query";
 
     private ArrayList<Journal> mJournalItems = new ArrayList<>();
-    private SearchRecentSuggestions mRecentSuggestions;
+    private static SearchRecentSuggestions sRecentSuggestions;
     private SearchView mSearchView;
     private MenuItem mSearchMenuItem;
     private JournalAdapter mAdapter;
@@ -105,13 +109,9 @@ public class DownloadFragment extends BaseFragment{
             mLoading = false;
             // execute the last saved query
             mQuery = QueryPreferences.getSavedQueryString(getActivity());
-            Timber.i("First time in, retrieving query: %s from shared prefs", mQuery);
             if(mQuery != null) {
                 postToAppBus(new QueryEvent(mQuery, mCurrentPage));
             } else {
-                mEmptyView.setText(R.string.empty_view_label);
-                mEmptyView.setVisibility(View.VISIBLE);
-                mRecyclerView.setVisibility(View.GONE);
                 Utils.showSnackbar(getActivity().findViewById(R.id.coordinator_layout), "Enter a search query");
             }
         } else {
@@ -119,6 +119,11 @@ public class DownloadFragment extends BaseFragment{
             mCurrentPage = savedInstanceState.getInt(SAVED_CURRENT_PAGE);
             mLoading = savedInstanceState.getBoolean(SAVED_LOADING);
             mQuery = savedInstanceState.getString(SAVED_QUERY);
+        }
+
+        if(mQuery == null || mJournalItems.size() == 0) {
+            mEmptyView.setVisibility(View.VISIBLE);
+            mRecyclerView.setVisibility(View.GONE);
         }
 
 
@@ -188,9 +193,9 @@ public class DownloadFragment extends BaseFragment{
                 mSearchMenuItem.collapseActionView();
 
                 // save the search query to the RecentSuggestionsProvider
-                mRecentSuggestions = new SearchRecentSuggestions(getActivity(),
+                sRecentSuggestions = new SearchRecentSuggestions(getActivity(),
                         QuerySuggestionProvider.AUTHORITY, QuerySuggestionProvider.MODE);
-                mRecentSuggestions.saveRecentQuery(mQuery, null);
+                sRecentSuggestions.saveRecentQuery(mQuery, null);
 
                 // post the query submitted by the user to the bus and save it to shared prefs
                 postToAppBus(new QueryEvent(mQuery, mCurrentPage));
@@ -217,12 +222,11 @@ public class DownloadFragment extends BaseFragment{
             Timber.i("Cleared shared prefs");
 
             // clear user's search history
-            if(mRecentSuggestions != null) {
-                ConfirmationDialogFragment dialog = ConfirmationDialogFragment.newInstance();
-                dialog.addSuggestionsToDialog(mRecentSuggestions);
+            if(sRecentSuggestions != null) {
+                ConfirmationDialogFragment dialog = new ConfirmationDialogFragment();
                 dialog.show(getFragmentManager(), "Clear history");
             } else {
-                Utils.showSnackbar(mView, "History cleared");
+                Utils.showSnackbar(mView, "History clear");
             }
             return true;
         }
@@ -237,15 +241,24 @@ public class DownloadFragment extends BaseFragment{
             mJournalItems.clear();
             mPreviousTotal = 0;
         }
-        // add new results to the adapter
-        mJournalItems.addAll(event.getResultQuery().getResultList().getResult());
-        mAdapter.notifyDataSetChanged();
-        mRecyclerView.setVisibility(View.VISIBLE);
-        mEmptyView.setVisibility(View.GONE);
-        if(mCurrentPage > 1) {
-            Utils.showSnackbar(mView, "Downloading more items");
+        List<Journal> resultList = event.getResultQuery().getResultList().getResult();
+        if(resultList.size() > 0) {
+            // add new results to the adapter
+            mJournalItems.addAll(resultList);
+            mAdapter.notifyDataSetChanged();
+            mRecyclerView.setVisibility(View.VISIBLE);
+            mEmptyView.setVisibility(View.GONE);
+            if(mCurrentPage > 1) {
+                Utils.showSnackbar(mView, "Downloading more items");
+            }
+            ++mCurrentPage;
+        } else {
+            // no results returned
+            mRecyclerView.setVisibility(View.GONE);
+            mEmptyView.setVisibility(View.VISIBLE);
+            Utils.showSnackbar(mView, "No results found");
         }
-        ++mCurrentPage;
+
     }
 
 
@@ -345,6 +358,38 @@ public class DownloadFragment extends BaseFragment{
         }
 
 
+    }
+
+
+    public static class ConfirmationDialogFragment extends DialogFragment {
+
+        public ConfirmationDialogFragment() {}
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            builder.setMessage(R.string.confirmation_dialog_message)
+                    .setPositiveButton(R.string.confirmation_dialog_positive_button,
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    sRecentSuggestions.clearHistory();
+                                    sRecentSuggestions = null;
+                                    Utils.showSnackbar(getActivity().findViewById(R.id.coordinator_layout), "Search history cleared");
+                                }
+                            })
+                    .setNegativeButton(R.string.confirmation_dialog_negative_button,
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    Utils.showSnackbar(getActivity().findViewById(R.id.coordinator_layout), "Action cancelled");
+                                }
+                            });
+
+
+            return builder.create();
+        }
     }
 
 
