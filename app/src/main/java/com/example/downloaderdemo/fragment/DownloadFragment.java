@@ -25,7 +25,7 @@ import com.example.downloaderdemo.R;
 import com.example.downloaderdemo.event.OnListItemClickEvent;
 import com.example.downloaderdemo.event.QueryEvent;
 import com.example.downloaderdemo.event.ResultQueryEvent;
-import com.example.downloaderdemo.model.Journal;
+import com.example.downloaderdemo.model.Article;
 import com.example.downloaderdemo.util.QueryPreferences;
 import com.example.downloaderdemo.util.QuerySuggestionProvider;
 import com.example.downloaderdemo.util.Utils;
@@ -60,7 +60,7 @@ public class DownloadFragment extends BaseFragment{
     private static final String SAVED_LOADING = "loading";
     private static final String SAVED_QUERY = "query";
 
-    private ArrayList<Journal> mJournalItems = new ArrayList<>();
+    private ArrayList<Article> mArticleItems = new ArrayList<>();
     private static SearchRecentSuggestions sRecentSuggestions;
     private SearchView mSearchView;
     private MenuItem mSearchMenuItem;
@@ -102,7 +102,7 @@ public class DownloadFragment extends BaseFragment{
         mLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(mLayoutManager);
 
-        mAdapter = new JournalAdapter(mJournalItems);
+        mAdapter = new JournalAdapter(mArticleItems);
         mRecyclerView.setAdapter(mAdapter);
 
         if(savedInstanceState == null) {
@@ -122,7 +122,7 @@ public class DownloadFragment extends BaseFragment{
             mQuery = savedInstanceState.getString(SAVED_QUERY);
         }
 
-        if(mQuery == null || mJournalItems.size() == 0) {
+        if(mQuery == null || mArticleItems.size() == 0) {
             mEmptyView.setVisibility(View.VISIBLE);
             mRecyclerView.setVisibility(View.GONE);
         }
@@ -250,13 +250,13 @@ public class DownloadFragment extends BaseFragment{
         // clear the arraylist if a new query has been submitted
         if(mNewQuerySubmitted) {
             mNewQuerySubmitted = false;
-            mJournalItems.clear();
+            mArticleItems.clear();
             mPreviousTotal = 0;
         }
-        List<Journal> resultList = event.getResultQuery().getResultList().getResult();
+        List<Article> resultList = event.getResultQuery().getResultList().getResult();
         if(resultList.size() > 0) {
             // add new results to the adapter
-            mJournalItems.addAll(resultList);
+            mArticleItems.addAll(resultList);
             mAdapter.notifyDataSetChanged();
             mRecyclerView.setVisibility(View.VISIBLE);
             mEmptyView.setVisibility(View.GONE);
@@ -275,17 +275,17 @@ public class DownloadFragment extends BaseFragment{
 
 
     // populate the arraylist on device rotation
-    public void setModelDataSet(ArrayList<Journal> list) {
-        mJournalItems = list;
+    public void setModelDataSet(ArrayList<Article> list) {
+        mArticleItems = list;
     }
 
 
     private class JournalAdapter extends RecyclerView.Adapter<JournalViewHolder> {
 
-        private List<Journal> mJournals;
+        private List<Article> mArticles;
 
-        public JournalAdapter(List<Journal> items) {
-            mJournals = items;
+        public JournalAdapter(List<Article> items) {
+            mArticles = items;
         }
 
 
@@ -303,22 +303,22 @@ public class DownloadFragment extends BaseFragment{
         public void onBindViewHolder(JournalViewHolder holder, int position) {
 
             // populate the viewholder
-            Journal journal = mJournals.get(position);
-            holder.bindJournal(journal);
+            Article article = mArticles.get(position);
+            holder.bindJournal(article);
         }
 
         @Override
         public int getItemCount() {
-            return mJournals.size();
+            return mArticles.size();
         }
 
         public void clearAll() {
-            mJournalItems.clear();
+            mArticleItems.clear();
             notifyDataSetChanged();
         }
 
-        public void addAll(List<Journal> items) {
-            mJournalItems.addAll(items);
+        public void addAll(List<Article> items) {
+            mArticleItems.addAll(items);
             notifyDataSetChanged();
         }
 
@@ -327,7 +327,7 @@ public class DownloadFragment extends BaseFragment{
 
     private class JournalViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
-        private Journal mJournal;
+        private Article mArticle;
 
         TextView articleTitle = null;
         TextView journalTitle = null;
@@ -352,22 +352,21 @@ public class DownloadFragment extends BaseFragment{
         }
 
 
-        public void bindJournal(Journal journal) {
-            mJournal = journal;
-            articleTitle.setText(mJournal.getTitle());
-            journalTitle.setText(mJournal.getJournalTitle());
-            articleAuthors.setText(mJournal.getAuthorString());
-            pageInformation.setText(mJournal.getPageInfo());
-            journalIssue.setText(mJournal.getJournalIssn());
-            journalVolume.setText(mJournal.getJournalVolume());
-            publicationYear.setText(mJournal.getPubYear());
-
+        public void bindJournal(Article article) {
+            mArticle = article;
+            articleTitle.setText(mArticle.getTitle());
+            journalTitle.setText(mArticle.getJournalInfo().getJournal().getTitle());
+            articleAuthors.setText(mArticle.getAuthorString());
+            pageInformation.setText(mArticle.getPageInfo());
+            journalIssue.setText(mArticle.getJournalInfo().getIssue());
+            journalVolume.setText(mArticle.getJournalInfo().getVolume());
+            publicationYear.setText(String.valueOf(mArticle.getJournalInfo().getYearOfPublication()));
         }
 
         @Override
         public void onClick(View view) {
             // post on click event to the bus
-            postToAppBus(new OnListItemClickEvent(mJournal));
+            postToAppBus(new OnListItemClickEvent(mArticle));
         }
 
 

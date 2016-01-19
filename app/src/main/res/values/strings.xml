@@ -10,4 +10,6 @@
     <string name="confirmation_dialog_positive_button">OK</string>
     <string name="confirmation_dialog_negative_button">Cancel</string>
     <string name="empty_view_label">No data available</string>
+    <string name="authors_label">Authors:</string>
+    <string name="year_label">Year:</string>
 </resources>

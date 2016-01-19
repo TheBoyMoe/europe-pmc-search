@@ -12,10 +12,8 @@ import com.example.downloaderdemo.event.OnListItemClickEvent;
 import com.example.downloaderdemo.fragment.DetailFragment;
 import com.example.downloaderdemo.fragment.DownloadFragment;
 import com.example.downloaderdemo.fragment.ModelFragment;
-import com.example.downloaderdemo.model.Journal;
+import com.example.downloaderdemo.model.Article;
 import com.squareup.otto.Subscribe;
-
-import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -70,18 +68,18 @@ public class MainActivity extends AppCompatActivity {
     // handle list item clicks
     @Subscribe
     public void onListItemClickEvent(OnListItemClickEvent event) {
-        Journal journal = event.getJournal();
-        if(journal != null) {
+        Article article = event.getArticle();
+        if(article != null) {
             // on tablets
             if(mDualPane) {
                 // swap the current fragment
                 getFragmentManager().beginTransaction()
-                        .replace(R.id.detail_fragment_container, DetailFragment.newInstance(journal))
+                        .replace(R.id.detail_fragment_container, DetailFragment.newInstance(article))
                         .commit();
             } else {
                 // on phones
                 Intent intent = new Intent(this, DetailActivity.class);
-                intent.putExtra(DetailFragment.JOURNAL_ITEM, journal);
+                intent.putExtra(DetailFragment.JOURNAL_ITEM, article);
                 startActivity(intent);
             }
         }

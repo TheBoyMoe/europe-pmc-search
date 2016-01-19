@@ -1,16 +1,16 @@
 package com.example.downloaderdemo.event;
 
-import com.example.downloaderdemo.model.Journal;
+import com.example.downloaderdemo.model.Article;
 
 public class OnListItemClickEvent extends BaseEvent{
 
-    private Journal mJournal;
+    private Article mArticle;
 
-    public OnListItemClickEvent(Journal journal) {
-        mJournal = journal;
+    public OnListItemClickEvent(Article article) {
+        mArticle = article;
     }
 
-    public Journal getJournal() {
-        return mJournal;
+    public Article getArticle() {
+        return mArticle;
     }
 }

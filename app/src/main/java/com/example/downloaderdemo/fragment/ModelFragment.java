@@ -10,9 +10,8 @@ import android.view.ViewGroup;
 import com.example.downloaderdemo.EuroPMCApplication;
 import com.example.downloaderdemo.event.QueryEvent;
 import com.example.downloaderdemo.event.ResultQueryEvent;
-import com.example.downloaderdemo.model.Journal;
+import com.example.downloaderdemo.model.Article;
 import com.example.downloaderdemo.model.ResultQuery;
-import com.example.downloaderdemo.util.Utils;
 import com.google.gson.Gson;
 import com.squareup.otto.Subscribe;
 
@@ -34,7 +33,7 @@ import timber.log.Timber;
 public class ModelFragment extends BaseFragment{
 
     private boolean mIsStarted = false;
-    private List<Journal> mJournals = new ArrayList<>();
+    private List<Article> mArticles = new ArrayList<>();
     private String mQuery;
     private String mCurrentPage;
 
@@ -64,13 +63,13 @@ public class ModelFragment extends BaseFragment{
         if(mQuery != null && event.getQuery() != null) {
             if(!mQuery.equals(event.getQuery())) {
                 // new query is received
-                mJournals.clear();
+                mArticles.clear();
             }
         }
         mQuery = event.getQuery();
         mCurrentPage = String.valueOf(event.getPageNumber());
         Timber.i("Received event: query: %s, current page: %s, cache size %d",
-                            mQuery, mCurrentPage, mJournals.size());
+                            mQuery, mCurrentPage, mArticles.size());
 
         if(mQuery != null && !mQuery.isEmpty()) {
             // execute the background thread
@@ -82,17 +81,19 @@ public class ModelFragment extends BaseFragment{
     }
 
 
-    public ArrayList<Journal> getModel() {
-        return new ArrayList<>(mJournals);
+    public ArrayList<Article> getModel() {
+        return new ArrayList<>(mArticles);
     }
 
 
-    public Journal getJournal(int position) {
-        return mJournals.get(position);
+    public Article getJournal(int position) {
+        return mArticles.get(position);
     }
 
 
     class DownloaderThread extends Thread {
+
+        // http://www.ebi.ac.uk/europepmc/webservices/rest/search?query=malaria&resulttype=core&format=json&pageSize=5&dataset=fulltext&page=5
 
         public DownloaderThread() { }
 
@@ -111,7 +112,7 @@ public class ModelFragment extends BaseFragment{
                         "http://www.ebi.ac.uk/europepmc/webservices/rest/search";
                 final String QUERY_PARAM = "query";
                 final String FORMAT_PARAM = "format";
-                final String RESULT_TYPE_PARAM = "resultType";
+                final String RESULT_TYPE_PARAM = "resulttype";
                 final String DATA_SET_PARAM = "dataset";
                 final String PAGE_PARAM = "page";
                 final String PAGE_SIZE = "pageSize";
@@ -138,7 +139,7 @@ public class ModelFragment extends BaseFragment{
                     EuroPMCApplication.postToBus(new ResultQueryEvent(resultQuery)); // post new results
 
                     // add the results to the current journal list
-                    mJournals.addAll(resultQuery.getResultList().getResult()); // add to the cache
+                    mArticles.addAll(resultQuery.getResultList().getResult()); // add to the cache
 
                     reader.close();
                     mIsStarted = false;

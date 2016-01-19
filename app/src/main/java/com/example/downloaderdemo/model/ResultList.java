@@ -4,9 +4,9 @@ import java.util.List;
 
 public class ResultList {
 
-    List<Journal> result;
+    List<Article> result;
 
-    public List<Journal> getResult() {
+    public List<Article> getResult() {
         return result;
     }
 }

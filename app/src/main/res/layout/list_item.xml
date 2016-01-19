@@ -11,9 +11,37 @@
     <TextView
         android:id="@+id/article_title"
         tools:text="Anaemia and the secondary causes of consuming to many cakes"
+        android:textColor="@color/colorPrimaryText"
+        android:textSize="15sp"
         android:singleLine="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
+
+
+    <!-- authors -->
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:text="@string/authors_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:id="@+id/article_authors"
+            android:paddingTop="@dimen/dimen_xsmall"
+            tools:text="A. Samuels, T. Pipps, J.A. Brown, et al"
+            android:singleLine="true"
+            android:paddingLeft="@dimen/dimen_xsmall"
+            android:paddingStart="@dimen/dimen_xsmall"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+
 
     <TextView
         android:id="@+id/journal_title"
@@ -22,68 +50,39 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
-    <TextView
-        android:id="@+id/article_authors"
-        android:paddingTop="@dimen/dimen_xsmall"
-        tools:text="A. Samuels, T. Pipps, J.A. Brown, et al"
-        android:singleLine="true"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
 
 
+
+    <!-- Journal info -->
     <LinearLayout
         android:orientation="horizontal"
         android:paddingTop="@dimen/dimen_xsmall"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-
+        <!-- year -->
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
 
             <TextView
-                android:text="@string/page_info_label"
-                android:singleLine="true"
+                android:text="@string/year_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
 
             <TextView
-                android:id="@+id/page_information"
+                android:id="@+id/publication_year"
+                tools:text="2014"
+                android:singleLine="true"
                 android:paddingLeft="@dimen/dimen_xsmall"
                 android:paddingStart="@dimen/dimen_xsmall"
-                tools:text="110-24"
-                android:singleLine="true"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
 
         </LinearLayout>
 
-        <LinearLayout
-            android:orientation="horizontal"
-            android:paddingLeft="@dimen/dimen_normal"
-            android:paddingStart="@dimen/dimen_normal"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-
-            <TextView
-                android:text="@string/issue_label"
-                android:singleLine="true"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-
-            <TextView
-                android:id="@+id/journal_issue"
-                android:paddingLeft="@dimen/dimen_xsmall"
-                android:paddingStart="@dimen/dimen_xsmall"
-                tools:text="12"
-                android:singleLine="true"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-
-        </LinearLayout>
-
+        <!-- volume -->
         <LinearLayout
             android:orientation="horizontal"
             android:paddingLeft="@dimen/dimen_normal"
@@ -108,18 +107,58 @@
 
         </LinearLayout>
 
-
-        <TextView
-            android:id="@+id/publication_year"
+        <!-- issue -->
+        <LinearLayout
+            android:orientation="horizontal"
             android:paddingLeft="@dimen/dimen_normal"
             android:paddingStart="@dimen/dimen_normal"
-            tools:text="2014"
-            android:singleLine="true"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content">
 
+            <TextView
+                android:text="@string/issue_label"
+                android:singleLine="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:id="@+id/journal_issue"
+                android:paddingLeft="@dimen/dimen_xsmall"
+                android:paddingStart="@dimen/dimen_xsmall"
+                tools:text="12"
+                android:singleLine="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+        </LinearLayout>
+
+        <!-- page -->
+        <LinearLayout
+            android:orientation="horizontal"
+            android:paddingLeft="@dimen/dimen_normal"
+            android:paddingStart="@dimen/dimen_normal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:text="@string/page_info_label"
+                android:singleLine="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:id="@+id/page_information"
+                android:paddingLeft="@dimen/dimen_xsmall"
+                android:paddingStart="@dimen/dimen_xsmall"
+                tools:text="110-24"
+                android:singleLine="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+        </LinearLayout>
 
     </LinearLayout>
+
 
 
 </LinearLayout>
