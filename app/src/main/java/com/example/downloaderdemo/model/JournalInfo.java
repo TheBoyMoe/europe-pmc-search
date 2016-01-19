@@ -7,8 +7,8 @@ public class JournalInfo implements Parcelable {
 
     private String issue;
     private String volume;
-    private long journalIssueId;
-    private int yearOfPublication;
+    private Long journalIssueId;
+    private Long yearOfPublication;
     private Journal journal;
 
     public JournalInfo() {}
@@ -21,11 +21,11 @@ public class JournalInfo implements Parcelable {
         return volume;
     }
 
-    public long getJournalIssueId() {
+    public Long getJournalIssueId() {
         return journalIssueId;
     }
 
-    public int getYearOfPublication() {
+    public Long getYearOfPublication() {
         return yearOfPublication;
     }
 
@@ -43,16 +43,16 @@ public class JournalInfo implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(this.issue);
         dest.writeString(this.volume);
-        dest.writeLong(this.journalIssueId);
-        dest.writeInt(this.yearOfPublication);
+        dest.writeValue(this.journalIssueId);
+        dest.writeValue(this.yearOfPublication);
         dest.writeParcelable(this.journal, 0);
     }
 
     protected JournalInfo(Parcel in) {
         this.issue = in.readString();
         this.volume = in.readString();
-        this.journalIssueId = in.readLong();
-        this.yearOfPublication = in.readInt();
+        this.journalIssueId = (Long) in.readValue(Long.class.getClassLoader());
+        this.yearOfPublication = (Long) in.readValue(Long.class.getClassLoader());
         this.journal = in.readParcelable(Journal.class.getClassLoader());
     }
 

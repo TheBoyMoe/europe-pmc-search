@@ -21,6 +21,7 @@
     <!-- authors -->
     <LinearLayout
         android:orientation="horizontal"
+        android:paddingTop="@dimen/dimen_xsmall"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
@@ -31,7 +32,6 @@
 
         <TextView
             android:id="@+id/article_authors"
-            android:paddingTop="@dimen/dimen_xsmall"
             tools:text="A. Samuels, T. Pipps, J.A. Brown, et al"
             android:singleLine="true"
             android:paddingLeft="@dimen/dimen_xsmall"
@@ -43,12 +43,29 @@
 
 
 
-    <TextView
-        android:id="@+id/journal_title"
+    <LinearLayout
+        android:orientation="horizontal"
         android:paddingTop="@dimen/dimen_xsmall"
-        tools:text="Journal of Biological Medicine"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:text="@string/journal_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:id="@+id/journal_title"
+            tools:text="Journal of Biological Medicine"
+            android:singleLine="true"
+            android:paddingLeft="@dimen/dimen_xsmall"
+            android:paddingStart="@dimen/dimen_xsmall"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+
 
 
 
@@ -82,67 +99,60 @@
 
         </LinearLayout>
 
-        <!-- volume -->
+        <!-- volume/issue -->
         <LinearLayout
             android:orientation="horizontal"
-            android:paddingLeft="@dimen/dimen_normal"
-            android:paddingStart="@dimen/dimen_normal"
+            android:paddingLeft="@dimen/dimen_small"
+            android:paddingStart="@dimen/dimen_small"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
 
             <TextView
                 android:text="@string/volume_label"
-                android:singleLine="true"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
+
 
             <TextView
                 android:id="@+id/journal_volume"
                 android:paddingLeft="@dimen/dimen_xsmall"
                 android:paddingStart="@dimen/dimen_xsmall"
                 tools:text="131"
+                android:singleLine="true"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
 
-
-        </LinearLayout>
-
-        <!-- issue -->
-        <LinearLayout
-            android:orientation="horizontal"
-            android:paddingLeft="@dimen/dimen_normal"
-            android:paddingStart="@dimen/dimen_normal"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-
             <TextView
-                android:text="@string/issue_label"
-                android:singleLine="true"
+                android:text="@string/left_bracket"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
 
             <TextView
                 android:id="@+id/journal_issue"
-                android:paddingLeft="@dimen/dimen_xsmall"
-                android:paddingStart="@dimen/dimen_xsmall"
                 tools:text="12"
                 android:singleLine="true"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
 
+            <TextView
+                android:text="@string/right_bracket"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+
         </LinearLayout>
+
 
         <!-- page -->
         <LinearLayout
             android:orientation="horizontal"
-            android:paddingLeft="@dimen/dimen_normal"
-            android:paddingStart="@dimen/dimen_normal"
+            android:paddingLeft="@dimen/dimen_small"
+            android:paddingStart="@dimen/dimen_small"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
 
             <TextView
                 android:text="@string/page_info_label"
-                android:singleLine="true"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
 
@@ -156,6 +166,34 @@
                 android:layout_height="wrap_content"/>
 
         </LinearLayout>
+
+
+        <!-- citations -->
+        <!--<LinearLayout-->
+            <!--android:orientation="horizontal"-->
+            <!--android:paddingLeft="@dimen/dimen_small"-->
+            <!--android:paddingStart="@dimen/dimen_small"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content">-->
+
+            <!--<TextView-->
+                <!--android:text="@string/cited_label"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"/>-->
+
+            <!--<TextView-->
+                <!--android:id="@+id/cited_times"-->
+                <!--android:singleLine="true"-->
+                <!--tools:text="4"-->
+                <!--android:paddingLeft="@dimen/dimen_xsmall"-->
+                <!--android:paddingStart="@dimen/dimen_xsmall"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"/>-->
+
+
+        <!--</LinearLayout>-->
+
+
 
     </LinearLayout>
 

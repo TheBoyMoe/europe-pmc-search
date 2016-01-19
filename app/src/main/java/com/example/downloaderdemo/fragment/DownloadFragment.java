@@ -335,7 +335,8 @@ public class DownloadFragment extends BaseFragment{
         TextView pageInformation = null;
         TextView journalIssue = null;
         TextView journalVolume = null;
-        TextView publicationYear = null;
+        TextView yearOfPublication = null;
+        //TextView cited = null;
 
         public JournalViewHolder(View view) {
 
@@ -348,25 +349,56 @@ public class DownloadFragment extends BaseFragment{
             pageInformation = (TextView) view.findViewById(R.id.page_information);
             journalIssue = (TextView) view.findViewById(R.id.journal_issue);
             journalVolume = (TextView) view.findViewById(R.id.journal_volume);
-            publicationYear = (TextView) view.findViewById(R.id.publication_year);
+            yearOfPublication = (TextView) view.findViewById(R.id.publication_year);
+            //cited = (TextView) view.findViewById(R.id.cited_times);
         }
 
 
         public void bindJournal(Article article) {
             mArticle = article;
-            articleTitle.setText(mArticle.getTitle());
-            journalTitle.setText(mArticle.getJournalInfo().getJournal().getTitle());
-            articleAuthors.setText(mArticle.getAuthorString());
-            pageInformation.setText(mArticle.getPageInfo());
-            journalIssue.setText(mArticle.getJournalInfo().getIssue());
-            journalVolume.setText(mArticle.getJournalInfo().getVolume());
-            publicationYear.setText(String.valueOf(mArticle.getJournalInfo().getYearOfPublication()));
+            articleTitle.setText(validateStringValue(mArticle.getTitle()));
+            articleAuthors.setText(validateStringValue(mArticle.getAuthorString()));
+            pageInformation.setText(validateStringValue(mArticle.getPageInfo()));
+            //cited.setText(validateLongValue(mArticle.getCitedByCount()));
+
+            if(mArticle.getJournalInfo() != null) {
+                yearOfPublication.setText(validateLongValue(mArticle.getJournalInfo().getYearOfPublication()));
+                journalVolume.setText(validateStringValue(mArticle.getJournalInfo().getVolume()));
+                journalIssue.setText(validateStringValue(mArticle.getJournalInfo().getIssue()));
+
+                if(mArticle.getJournalInfo().getJournal() != null) {
+                    journalTitle.setText(validateStringValue(mArticle.getJournalInfo().getJournal().getTitle()));
+                } else {
+                    journalTitle.setText(R.string.na_label);
+                }
+            } else {
+                yearOfPublication.setText(R.string.na_label);
+                journalVolume.setText(R.string.na_label);
+                journalIssue.setText(R.string.na_label);
+                journalTitle.setText(R.string.na_label);
+            }
         }
 
         @Override
         public void onClick(View view) {
             // post on click event to the bus
             postToAppBus(new OnListItemClickEvent(mArticle));
+        }
+
+
+        private String validateStringValue(String value) {
+            if(value != null && !value.equals("")){
+                return value;
+            } else {
+                return getString(R.string.na_label);
+            }
+        }
+
+        private String validateLongValue(Long value) {
+            if(value != null)
+                return String.valueOf(value);
+            else
+                return getString(R.string.na_label);
         }
 
 

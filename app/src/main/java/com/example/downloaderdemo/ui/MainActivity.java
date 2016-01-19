@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 // on phones
                 Intent intent = new Intent(this, DetailActivity.class);
-                intent.putExtra(DetailFragment.JOURNAL_ITEM, article);
+                intent.putExtra(DetailFragment.ARTICLE_ITEM, article);
                 startActivity(intent);
             }
         }

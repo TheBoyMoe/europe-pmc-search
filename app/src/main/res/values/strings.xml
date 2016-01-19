@@ -1,7 +1,6 @@
 <resources>
     <string name="app_name">Search EuroPMC Demo</string>
-    <string name="volume_label">vol:</string>
-    <string name="issue_label">issue:</string>
+    <string name="volume_label">vol(no):</string>
     <string name="page_info_label">page:</string>
     <string name="article_authors_label">authors:</string>
     <string name="search_label">Search</string>
@@ -11,5 +10,22 @@
     <string name="confirmation_dialog_negative_button">Cancel</string>
     <string name="empty_view_label">No data available</string>
     <string name="authors_label">Authors:</string>
-    <string name="year_label">Year:</string>
+    <string name="year_label">yr:</string>
+    <string name="abstract_label">Abstract</string>
+    <string name="abstract_text">To describe the perceptions of young adults with sickle cell
+        disease concerning their disease experience.Sickle cell disease is a lifelong, genetic
+        condition with both acute and chronic painful exacerbations. Little is known of the
+        experiences of young adults with sickle cell disease.This study used a qualitative,
+        descriptive design with semi-structured, life review interviews.Between
+        August 2010-September 2012, purposive sampling was used to recruit participants with
+        a known sickle cell disease diagnosis who were ages 18-35 years, were being seen in
+        an outpatient sickle cell clinic and were English speaking.</string>
+    <string name="cited_label">cited:</string>
+    <string name="left_bracket">(</string>
+    <string name="right_bracket">)</string>
+    <string name="divider_label">/</string>
+    <string name="keywords_label">Keywords</string>
+    <string name="na_label">n/a</string>
+    <string name="journal_label">Journal:</string>
+    <string name="article_info_label">Article information</string>
 </resources>

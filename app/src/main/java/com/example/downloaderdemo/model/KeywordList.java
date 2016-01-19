@@ -3,13 +3,15 @@ package com.example.downloaderdemo.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.List;
+
 public class KeywordList implements Parcelable {
 
-    private String[] keyword;
+    private List<String> keyword;
 
     public KeywordList() {  }
 
-    public String[] getKeyword() {
+    public List<String> getKeyword() {
         return keyword;
     }
 
@@ -21,11 +23,11 @@ public class KeywordList implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeStringArray(this.keyword);
+        dest.writeStringList(this.keyword);
     }
 
     protected KeywordList(Parcel in) {
-        this.keyword = in.createStringArray();
+        this.keyword = in.createStringArrayList();
     }
 
     public static final Parcelable.Creator<KeywordList> CREATOR = new Parcelable.Creator<KeywordList>() {

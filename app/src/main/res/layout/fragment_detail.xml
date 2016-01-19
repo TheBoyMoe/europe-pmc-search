@@ -1,15 +1,245 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:orientation="vertical"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent">
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:ignore="RtlSymmetry">
 
-    <TextView
-        android:id="@+id/article_title"
-        tools:text=""
-        android:layout_gravity="center_vertical"
+
+    <LinearLayout
+        android:padding="@dimen/dimen_normal"
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content">
 
-</LinearLayout>
+        <TextView
+            android:id="@+id/article_title"
+            tools:text="Anaemia and the secondary causes of consuming to many cakes"
+            android:textColor="@color/colorPrimaryText"
+            android:textSize="18sp"
+            android:singleLine="true"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <!-- authors -->
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:text="@string/authors_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:id="@+id/article_authors"
+                android:paddingTop="@dimen/dimen_xsmall"
+                tools:text="A. Samuels, T. Pipps, J.A. Brown, et al"
+                android:singleLine="true"
+                android:paddingLeft="@dimen/dimen_xsmall"
+                android:paddingStart="@dimen/dimen_xsmall"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+        </LinearLayout>
+
+
+        <!-- Journal title-->
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:text="@string/journal_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+
+            <TextView
+                android:id="@+id/journal_title"
+                android:paddingTop="@dimen/dimen_xsmall"
+                android:paddingLeft="@dimen/dimen_xsmall"
+                android:paddingStart="@dimen/dimen_xsmall"
+                android:singleLine="true"
+                tools:text="Journal of Biological Medicine"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+        </LinearLayout>
+
+
+        <!-- article abstract -->
+        <TextView
+            android:text="@string/abstract_label"
+            android:textColor="@color/colorPrimaryText"
+            android:textSize="16sp"
+            android:paddingTop="@dimen/dimen_normal"
+            android:paddingBottom="@dimen/dimen_small"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:id="@+id/article_abstract"
+            tools:text="@string/abstract_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <!-- keywords -->
+        <TextView
+            android:text="@string/keywords_label"
+            android:paddingTop="@dimen/dimen_normal"
+            android:paddingBottom="@dimen/dimen_small"
+            android:textColor="@color/colorPrimaryText"
+            android:textSize="16sp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+
+        <TextView
+            android:id="@+id/article_keywords"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+
+        <!-- Journal info -->
+        <TextView
+            android:text="@string/article_info_label"
+            android:paddingTop="@dimen/dimen_normal"
+            android:paddingBottom="@dimen/dimen_small"
+            android:textColor="@color/colorPrimaryText"
+            android:textSize="16sp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <!-- year -->
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:text="@string/year_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <TextView
+                    android:id="@+id/publication_year"
+                    tools:text="2014"
+                    android:singleLine="true"
+                    android:paddingLeft="@dimen/dimen_xsmall"
+                    android:paddingStart="@dimen/dimen_xsmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+            </LinearLayout>
+
+            <!-- volume/issue -->
+            <LinearLayout
+                android:orientation="horizontal"
+                android:paddingLeft="@dimen/dimen_small"
+                android:paddingStart="@dimen/dimen_small"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:text="@string/volume_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+
+                <TextView
+                    android:id="@+id/journal_volume"
+                    android:paddingLeft="@dimen/dimen_xsmall"
+                    android:paddingStart="@dimen/dimen_xsmall"
+                    android:singleLine="true"
+                    tools:text="131"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <TextView
+                    android:text="@string/left_bracket"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <TextView
+                    android:id="@+id/journal_issue"
+                    tools:text="12"
+                    android:singleLine="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <TextView
+                    android:text="@string/right_bracket"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+
+            </LinearLayout>
+
+
+            <!-- page -->
+            <LinearLayout
+                android:orientation="horizontal"
+                android:paddingLeft="@dimen/dimen_small"
+                android:paddingStart="@dimen/dimen_small"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:text="@string/page_info_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <TextView
+                    android:id="@+id/page_information"
+                    android:paddingLeft="@dimen/dimen_xsmall"
+                    android:paddingStart="@dimen/dimen_xsmall"
+                    tools:text="110-24"
+                    android:singleLine="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+            </LinearLayout>
+
+
+            <!-- citations -->
+            <LinearLayout
+                android:orientation="horizontal"
+                android:paddingLeft="@dimen/dimen_small"
+                android:paddingStart="@dimen/dimen_small"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:text="@string/cited_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <TextView
+                    android:id="@+id/cited_times"
+                    android:singleLine="true"
+                    tools:text="4"
+                    android:paddingLeft="@dimen/dimen_xsmall"
+                    android:paddingStart="@dimen/dimen_xsmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+
+            </LinearLayout>
+
+
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+</ScrollView>

@@ -19,20 +19,12 @@ public class Article implements Parcelable {
     private String inEPMC;
     private String inPMC;
     private String hasPDF;
-    private int citedByCount;
+    private Long citedByCount;
 
     public Article() {  }
 
     public String getId() {
         return id;
-    }
-
-    public String getSource() {
-        return source;
-    }
-
-    public String getPmid() {
-        return pmid;
     }
 
     public String getTitle() {
@@ -55,31 +47,11 @@ public class Article implements Parcelable {
         return abstractText;
     }
 
-    public String getAffiliation() {
-        return affiliation;
-    }
-
-    public String getLanguage() {
-        return language;
-    }
-
     public KeywordList getKeywordList() {
         return keywordList;
     }
 
-    public String getInEPMC() {
-        return inEPMC;
-    }
-
-    public String getInPMC() {
-        return inPMC;
-    }
-
-    public String getHasPDF() {
-        return hasPDF;
-    }
-
-    public int getCitedByCount() {
+    public Long getCitedByCount() {
         return citedByCount;
     }
 
@@ -101,16 +73,16 @@ public class Article implements Parcelable {
         dest.writeString(this.pmid);
         dest.writeString(this.title);
         dest.writeString(this.authorString);
-        dest.writeParcelable(this.journalInfo, flags);
+        dest.writeParcelable(this.journalInfo, 0);
         dest.writeString(this.pageInfo);
         dest.writeString(this.abstractText);
         dest.writeString(this.affiliation);
         dest.writeString(this.language);
-        dest.writeParcelable(this.keywordList, flags);
+        dest.writeParcelable(this.keywordList, 0);
         dest.writeString(this.inEPMC);
         dest.writeString(this.inPMC);
         dest.writeString(this.hasPDF);
-        dest.writeInt(this.citedByCount);
+        dest.writeValue(this.citedByCount);
     }
 
     protected Article(Parcel in) {
@@ -128,10 +100,10 @@ public class Article implements Parcelable {
         this.inEPMC = in.readString();
         this.inPMC = in.readString();
         this.hasPDF = in.readString();
-        this.citedByCount = in.readInt();
+        this.citedByCount = (Long) in.readValue(Long.class.getClassLoader());
     }
 
-    public static final Parcelable.Creator<Article> CREATOR = new Parcelable.Creator<Article>() {
+    public static final Creator<Article> CREATOR = new Creator<Article>() {
         public Article createFromParcel(Parcel source) {
             return new Article(source);
         }
