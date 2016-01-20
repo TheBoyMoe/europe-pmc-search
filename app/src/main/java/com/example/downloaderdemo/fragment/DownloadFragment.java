@@ -7,9 +7,11 @@ import android.app.DialogFragment;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.provider.SearchRecentSuggestions;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
@@ -26,6 +28,7 @@ import com.example.downloaderdemo.event.OnListItemClickEvent;
 import com.example.downloaderdemo.event.QueryEvent;
 import com.example.downloaderdemo.event.ResultQueryEvent;
 import com.example.downloaderdemo.model.Article;
+import com.example.downloaderdemo.util.HorizontalDivider;
 import com.example.downloaderdemo.util.QueryPreferences;
 import com.example.downloaderdemo.util.QuerySuggestionProvider;
 import com.example.downloaderdemo.util.Utils;
@@ -101,6 +104,8 @@ public class DownloadFragment extends BaseFragment{
 
         mLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(mLayoutManager);
+        Drawable itemDivider = ContextCompat.getDrawable(getActivity(), R.drawable.item_divider);
+        mRecyclerView.addItemDecoration(new HorizontalDivider(itemDivider));
 
         mAdapter = new JournalAdapter(mArticleItems);
         mRecyclerView.setAdapter(mAdapter);
@@ -162,7 +167,6 @@ public class DownloadFragment extends BaseFragment{
         } else {
             Utils.showSnackbar(getActivity().findViewById(R.id.coordinator_layout), "No network connection");
         }
-
     }
 
     @Override
@@ -359,7 +363,7 @@ public class DownloadFragment extends BaseFragment{
             articleTitle.setText(validateStringValue(mArticle.getTitle()));
             articleAuthors.setText(validateStringValue(mArticle.getAuthorString()));
             pageInformation.setText(validateStringValue(mArticle.getPageInfo()));
-            //cited.setText(validateLongValue(mArticle.getCitedByCount()));
+             //cited.setText(validateLongValue(mArticle.getCitedByCount()));
 
             if(mArticle.getJournalInfo() != null) {
                 yearOfPublication.setText(validateLongValue(mArticle.getJournalInfo().getYearOfPublication()));
@@ -400,7 +404,6 @@ public class DownloadFragment extends BaseFragment{
             else
                 return getString(R.string.na_label);
         }
-
 
     }
 
