@@ -1,4 +1,4 @@
-package com.example.downloaderdemo.util;
+package com.example.downloaderdemo.ui;
 
 /**
  * Reference

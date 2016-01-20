@@ -6,7 +6,8 @@
               android:orientation="vertical"
               android:padding="@dimen/dimen_normal"
               android:layout_width="match_parent"
-              android:layout_height="wrap_content">
+              android:layout_height="wrap_content"
+              style="@style/activated">
 
     <TextView
         android:id="@+id/article_title"
@@ -42,7 +43,7 @@
     </LinearLayout>
 
 
-
+    <!-- journal title -->
     <LinearLayout
         android:orientation="horizontal"
         android:paddingTop="@dimen/dimen_xsmall"
@@ -64,10 +65,6 @@
             android:layout_height="wrap_content"/>
 
     </LinearLayout>
-
-
-
-
 
 
     <!-- Journal info -->

@@ -1,4 +1,4 @@
-package com.example.downloaderdemo.ui;
+package com.example.downloaderdemo.activity;
 
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
@@ -8,6 +8,7 @@ import android.view.View;
 
 import com.example.downloaderdemo.EuroPMCApplication;
 import com.example.downloaderdemo.R;
+import com.example.downloaderdemo.activity.DetailActivity;
 import com.example.downloaderdemo.event.OnListItemClickEvent;
 import com.example.downloaderdemo.fragment.DetailFragment;
 import com.example.downloaderdemo.fragment.DownloadFragment;

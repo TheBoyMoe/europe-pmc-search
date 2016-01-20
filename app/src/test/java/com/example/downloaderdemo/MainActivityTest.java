@@ -5,7 +5,7 @@ import android.os.Build;
 
 import com.example.downloaderdemo.fragment.DownloadFragment;
 import com.example.downloaderdemo.fragment.ModelFragment;
-import com.example.downloaderdemo.ui.MainActivity;
+import com.example.downloaderdemo.activity.MainActivity;
 
 import org.junit.Before;
 import org.junit.Test;

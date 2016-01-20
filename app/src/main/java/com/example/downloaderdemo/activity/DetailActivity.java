@@ -1,4 +1,4 @@
-package com.example.downloaderdemo.ui;
+package com.example.downloaderdemo.activity;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;

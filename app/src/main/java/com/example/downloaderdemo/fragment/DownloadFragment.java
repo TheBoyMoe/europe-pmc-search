@@ -28,7 +28,9 @@ import com.example.downloaderdemo.event.OnListItemClickEvent;
 import com.example.downloaderdemo.event.QueryEvent;
 import com.example.downloaderdemo.event.ResultQueryEvent;
 import com.example.downloaderdemo.model.Article;
-import com.example.downloaderdemo.util.HorizontalDivider;
+import com.example.downloaderdemo.ui.ChoiceCapableAdapter;
+import com.example.downloaderdemo.ui.HorizontalDivider;
+import com.example.downloaderdemo.ui.SingleChoiceMode;
 import com.example.downloaderdemo.util.QueryPreferences;
 import com.example.downloaderdemo.util.QuerySuggestionProvider;
 import com.example.downloaderdemo.util.Utils;
@@ -55,6 +57,9 @@ import timber.log.Timber;
  * [4] http://stackoverflow.com/questions/26543131/how-to-implement-endless-list-with-recyclerview
  * [5] http://androhub.com/load-more-items-on-scroll-android/
  *
+ * SingleChoiceMode
+ * [6] The Busy Coder's Guide to Android Development (https://commonsware.com/Android) p1260
+ *
  */
 
 public class DownloadFragment extends BaseFragment{
@@ -67,7 +72,7 @@ public class DownloadFragment extends BaseFragment{
     private static SearchRecentSuggestions sRecentSuggestions;
     private SearchView mSearchView;
     private MenuItem mSearchMenuItem;
-    private JournalAdapter mAdapter;
+    private ChoiceCapableAdapter<?> mAdapter;
     private RecyclerView mRecyclerView;
     private TextView mEmptyView;
     private LinearLayoutManager mLayoutManager;
@@ -93,6 +98,15 @@ public class DownloadFragment extends BaseFragment{
     }
 
 
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        if(savedInstanceState != null) {
+            mAdapter.onRestoreInstanceState(savedInstanceState);
+        }
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -107,7 +121,7 @@ public class DownloadFragment extends BaseFragment{
         Drawable itemDivider = ContextCompat.getDrawable(getActivity(), R.drawable.item_divider);
         mRecyclerView.addItemDecoration(new HorizontalDivider(itemDivider));
 
-        mAdapter = new JournalAdapter(mArticleItems);
+        mAdapter = new JournalAdapter(mRecyclerView);
         mRecyclerView.setAdapter(mAdapter);
 
         if(savedInstanceState == null) {
@@ -175,7 +189,11 @@ public class DownloadFragment extends BaseFragment{
         outState.putInt(SAVED_CURRENT_PAGE, mCurrentPage);
         outState.putBoolean(SAVED_LOADING, mLoading);
         outState.putString(SAVED_QUERY, mQuery);
+
+        mAdapter.onSaveInstanceState(outState);
     }
+
+
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -284,12 +302,11 @@ public class DownloadFragment extends BaseFragment{
     }
 
 
-    private class JournalAdapter extends RecyclerView.Adapter<JournalViewHolder> {
+    private class JournalAdapter extends ChoiceCapableAdapter<JournalViewHolder> {
 
-        private List<Article> mArticles;
 
-        public JournalAdapter(List<Article> items) {
-            mArticles = items;
+        public JournalAdapter(RecyclerView recyclerView) {
+            super(recyclerView, new SingleChoiceMode());
         }
 
 
@@ -297,23 +314,19 @@ public class DownloadFragment extends BaseFragment{
         public JournalViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
             // create the viewholder
-            LayoutInflater inflater = LayoutInflater.from(getActivity());
-            View view = inflater.inflate(R.layout.list_item, parent, false);
-
-            return new JournalViewHolder(view);
+            return (new JournalViewHolder(this, getActivity().getLayoutInflater()
+                            .inflate(R.layout.list_item, parent, false)));
         }
 
         @Override
         public void onBindViewHolder(JournalViewHolder holder, int position) {
-
             // populate the viewholder
-            Article article = mArticles.get(position);
-            holder.bindJournal(article);
+            holder.bindJournal(mArticleItems.get(position));
         }
 
         @Override
         public int getItemCount() {
-            return mArticles.size();
+            return mArticleItems.size();
         }
 
         public void clearAll() {
@@ -329,9 +342,11 @@ public class DownloadFragment extends BaseFragment{
     }
 
 
-    private class JournalViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+    public class JournalViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
         private Article mArticle;
+        private ChoiceCapableAdapter mAdapter;
+        private View mView;
 
         TextView articleTitle = null;
         TextView journalTitle = null;
@@ -342,19 +357,21 @@ public class DownloadFragment extends BaseFragment{
         TextView yearOfPublication = null;
         //TextView cited = null;
 
-        public JournalViewHolder(View view) {
-
+        public JournalViewHolder(ChoiceCapableAdapter adapter, View view) {
             super(view);
-            view.setOnClickListener(this);
+            mAdapter = adapter;
+            mView = view;
 
-            articleTitle = (TextView) view.findViewById(R.id.article_title);
-            journalTitle = (TextView) view.findViewById(R.id.journal_title);
-            articleAuthors = (TextView) view.findViewById(R.id.article_authors);
-            pageInformation = (TextView) view.findViewById(R.id.page_information);
-            journalIssue = (TextView) view.findViewById(R.id.journal_issue);
-            journalVolume = (TextView) view.findViewById(R.id.journal_volume);
-            yearOfPublication = (TextView) view.findViewById(R.id.publication_year);
+            articleTitle = (TextView) mView.findViewById(R.id.article_title);
+            journalTitle = (TextView) mView.findViewById(R.id.journal_title);
+            articleAuthors = (TextView) mView.findViewById(R.id.article_authors);
+            pageInformation = (TextView) mView.findViewById(R.id.page_information);
+            journalIssue = (TextView) mView.findViewById(R.id.journal_issue);
+            journalVolume = (TextView) mView.findViewById(R.id.journal_volume);
+            yearOfPublication = (TextView) mView.findViewById(R.id.publication_year);
             //cited = (TextView) view.findViewById(R.id.cited_times);
+
+            mView.setOnClickListener(this);
         }
 
 
@@ -381,12 +398,23 @@ public class DownloadFragment extends BaseFragment{
                 journalIssue.setText(R.string.na_label);
                 journalTitle.setText(R.string.na_label);
             }
+
+            setChecked(mAdapter.isChecked(getAdapterPosition()));
+        }
+
+        public void setChecked(boolean isChecked) {
+            mView.setActivated(isChecked);
         }
 
         @Override
         public void onClick(View view) {
             // post on click event to the bus
             postToAppBus(new OnListItemClickEvent(mArticle));
+
+            // handle checked status
+            boolean isCheckedNow = mAdapter.isChecked(getAdapterPosition());
+            mAdapter.onChecked(getAdapterPosition(), !isCheckedNow);
+            mView.setActivated(!isCheckedNow);
         }
 
 
@@ -404,6 +432,7 @@ public class DownloadFragment extends BaseFragment{
             else
                 return getString(R.string.na_label);
         }
+
 
     }
 

@@ -84,6 +84,7 @@
         <TextView
             android:id="@+id/article_abstract"
             tools:text="@string/abstract_text"
+            android:lineSpacingExtra="@dimen/dimen_xsmall"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
@@ -100,6 +101,7 @@
 
         <TextView
             android:id="@+id/article_keywords"
+            android:lineSpacingExtra="@dimen/dimen_xsmall"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
