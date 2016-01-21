@@ -55,6 +55,38 @@ public class Article implements Parcelable {
         return citedByCount;
     }
 
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setAuthorString(String authorString) {
+        this.authorString = authorString;
+    }
+
+    public void setJournalInfo(JournalInfo journalInfo) {
+        this.journalInfo = journalInfo;
+    }
+
+    public void setPageInfo(String pageInfo) {
+        this.pageInfo = pageInfo;
+    }
+
+    public void setAbstractText(String abstractText) {
+        this.abstractText = abstractText;
+    }
+
+    public void setKeywordList(KeywordList keywordList) {
+        this.keywordList = keywordList;
+    }
+
+    public void setCitedByCount(Long citedByCount) {
+        this.citedByCount = citedByCount;
+    }
+
     @Override
     public String toString() {
         return title;

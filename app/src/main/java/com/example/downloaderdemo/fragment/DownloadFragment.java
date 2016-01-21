@@ -5,10 +5,15 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.SearchManager;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.provider.SearchRecentSuggestions;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
@@ -28,15 +33,20 @@ import com.example.downloaderdemo.event.OnListItemClickEvent;
 import com.example.downloaderdemo.event.QueryEvent;
 import com.example.downloaderdemo.event.ResultQueryEvent;
 import com.example.downloaderdemo.model.Article;
+import com.example.downloaderdemo.model.Journal;
+import com.example.downloaderdemo.model.JournalInfo;
+import com.example.downloaderdemo.model.KeywordList;
 import com.example.downloaderdemo.ui.ChoiceCapableAdapter;
 import com.example.downloaderdemo.ui.HorizontalDivider;
 import com.example.downloaderdemo.ui.SingleChoiceMode;
+import com.example.downloaderdemo.util.DatabaseHelper;
 import com.example.downloaderdemo.util.QueryPreferences;
 import com.example.downloaderdemo.util.QuerySuggestionProvider;
 import com.example.downloaderdemo.util.Utils;
 import com.squareup.otto.Subscribe;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import timber.log.Timber;
@@ -60,6 +70,9 @@ import timber.log.Timber;
  * SingleChoiceMode
  * [6] The Busy Coder's Guide to Android Development (https://commonsware.com/Android) p1260
  *
+ * SQLiteDatabase
+ * [7] The Busy Coder's Guide to Android Development (https://commonsware.com/Android) p598-608
+ *
  */
 
 public class DownloadFragment extends BaseFragment{
@@ -79,6 +92,23 @@ public class DownloadFragment extends BaseFragment{
     private String mQuery;
     private View mView;
     private boolean mNewQuerySubmitted;
+    private DatabaseHelper mHelper;
+    //private Cursor mCursor;
+    private AsyncTask mTask;
+    private String[] mProjection = {
+            "ROWID AS _id",
+            DatabaseHelper.ARTICLE_TITLE,
+            DatabaseHelper.JOURNAL_TITLE,
+            DatabaseHelper.AUTHOR_STRING,
+            DatabaseHelper.JOURNAL_INFO,
+            DatabaseHelper.PAGE_INFO,
+            DatabaseHelper.ABSTRACT_TEXT,
+            DatabaseHelper.KEYWORD_LIST,
+            DatabaseHelper.VOLUME,
+            DatabaseHelper.ISSUE,
+            DatabaseHelper.YEAR_OF_PUBLICATION,
+            DatabaseHelper.CITED
+    };
 
     // endless scrolling variables
     private boolean mLoading = true;
@@ -97,6 +127,17 @@ public class DownloadFragment extends BaseFragment{
         setHasOptionsMenu(true);
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if(mTask != null) {
+            // cancel any tasks that have not completed
+            mTask.cancel(false);
+        }
+
+        // close dbase connection
+        mHelper.close();
+    }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -124,13 +165,19 @@ public class DownloadFragment extends BaseFragment{
         mAdapter = new JournalAdapter(mRecyclerView);
         mRecyclerView.setAdapter(mAdapter);
 
+        mHelper = DatabaseHelper.getInstance(getActivity());
+
         if(savedInstanceState == null) {
             mCurrentPage = 1;
             mLoading = false;
             // execute the last saved query
             mQuery = QueryPreferences.getSavedQueryString(getActivity());
             if(mQuery != null) {
-                getSearchResults(); // execute search in background thread
+                // getSearchResults(); // execute search in background thread
+
+                // load results from database
+                mTask = new QueryTask().execute();
+
             } else {
                 Utils.showSnackbar(getActivity().findViewById(R.id.coordinator_layout), "Enter a search query");
             }
@@ -167,7 +214,6 @@ public class DownloadFragment extends BaseFragment{
                     // end of page has been reached, download more items
                     mLoading = true;
                     getSearchResults();
-                    //postToAppBus(new QueryEvent(mQuery, mCurrentPage));
                 }
             }
         });
@@ -192,7 +238,6 @@ public class DownloadFragment extends BaseFragment{
 
         mAdapter.onSaveInstanceState(outState);
     }
-
 
 
     @Override
@@ -269,12 +314,17 @@ public class DownloadFragment extends BaseFragment{
 
     @Subscribe
     public void getResultsOfSearchQuery(ResultQueryEvent event) {
+
         // clear the arraylist if a new query has been submitted
         if(mNewQuerySubmitted) {
             mNewQuerySubmitted = false;
             mArticleItems.clear();
             mPreviousTotal = 0;
+
+            // delete records from the database
+            mTask =  new DeleteTask().execute();
         }
+
         List<Article> resultList = event.getResultQuery().getResultList().getResult();
         if(resultList.size() > 0) {
             // add new results to the adapter
@@ -286,6 +336,11 @@ public class DownloadFragment extends BaseFragment{
                 Utils.showSnackbar(mView, "Downloading more items");
             }
             ++mCurrentPage;
+
+            // convert list to array and execute insert task, adding the results to the dbase
+            Article[] list = resultList.toArray(new Article[resultList.size()]);
+            mTask = new InsertTask().execute(list);
+
         } else {
             // no results returned
             mRecyclerView.setVisibility(View.GONE);
@@ -469,5 +524,119 @@ public class DownloadFragment extends BaseFragment{
     }
 
 
+    // database helper methods
+    private abstract class BaseTask<T> extends AsyncTask<T, Void, Cursor> {
+
+        @Override
+        protected void onPostExecute(Cursor cursor) {
+
+            // convert the cursor to an arraylist of Article Pojos update the adapter
+            Article article = new Article();
+            JournalInfo journalInfo = new JournalInfo();
+            Journal journal = new Journal();
+            KeywordList keywordList = new KeywordList();
+            mArticleItems.clear();
+
+            while(cursor.moveToNext()) {
+
+                // populate article fields
+                article.setId(cursor.getString(cursor.getColumnIndex(DatabaseHelper.ARTICLE_ID)));
+                article.setTitle(cursor.getString(cursor.getColumnIndex(DatabaseHelper.ARTICLE_TITLE)));
+                article.setAuthorString(cursor.getString(cursor.getColumnIndex(DatabaseHelper.AUTHOR_STRING)));
+                article.setPageInfo(cursor.getString(cursor.getColumnIndex(DatabaseHelper.PAGE_INFO)));
+                article.setAbstractText(cursor.getString(cursor.getColumnIndex(DatabaseHelper.ABSTRACT_TEXT)));
+                article.setCitedByCount(Long.valueOf(cursor.getString(cursor.getColumnIndex(DatabaseHelper.ARTICLE_ID))));
+
+                // populate journalInfo fields
+                journalInfo.setIssue(cursor.getString(cursor.getColumnIndex(DatabaseHelper.ISSUE)));
+                journalInfo.setVolume(cursor.getString(cursor.getColumnIndex(DatabaseHelper.VOLUME)));
+                journalInfo.setYearOfPublication(Long.valueOf(cursor.getString(cursor.getColumnIndex(DatabaseHelper.YEAR_OF_PUBLICATION))));
+
+                // populate Journal field
+                journal.setTitle(cursor.getString(cursor.getColumnIndex(DatabaseHelper.JOURNAL_TITLE)));
+
+                // populate Keywords List field
+                String str = cursor.getString(cursor.getColumnIndex(DatabaseHelper.KEYWORD_LIST));
+                List<String> keywords = Arrays.asList(str.split("\\s*,\\s*"));
+                keywordList.setKeyword(keywords);
+
+                // add the objects to article
+                journalInfo.setJournal(journal);
+                article.setJournalInfo(journalInfo);
+                article.setKeywordList(keywordList);
+
+                // add each article to the List of results
+                mArticleItems.add(article);
+            }
+            // update the UI
+            mAdapter.notifyDataSetChanged();
+
+        }
+
+        //  execute query in doInBackground(), resulting cursor passed to onPostExecute()
+        protected Cursor doQuery() {
+            Cursor result = mHelper.getReadableDatabase()
+                    .query(DatabaseHelper.TABLE_NAME,
+                            mProjection,
+                            null,
+                            null,
+                            null,
+                            null,
+                            DatabaseHelper.ARTICLE_TITLE);
+            result.getCount(); // ensure the query is executed
+            return result;
+        }
+    }
+
+
+    // query the database, returning all records based on the projection
+    private class QueryTask extends BaseTask<Void> {
+        @Override
+        protected Cursor doInBackground(Void... params) {
+            return doQuery();
+        }
+    }
+
+
+    // insert record into the database
+    private class InsertTask extends BaseTask<Article> {
+
+        @Override
+        protected Cursor doInBackground(Article... params) {
+
+            // iterate through the array of articles, inserting each in turn
+            ContentValues values = new ContentValues();
+            SQLiteDatabase db = mHelper.getWritableDatabase();
+
+            for (Article article : params) {
+                values.clear();
+                values.put(DatabaseHelper.ARTICLE_ID, article.getId());
+                values.put(DatabaseHelper.ARTICLE_TITLE, article.getTitle());
+                values.put(DatabaseHelper.JOURNAL_TITLE, article.getJournalInfo().getJournal().getTitle());
+                values.put(DatabaseHelper.AUTHOR_STRING, article.getAuthorString());
+                values.put(DatabaseHelper.PAGE_INFO, article.getPageInfo());
+                values.put(DatabaseHelper.ABSTRACT_TEXT, article.getAbstractText());
+                values.put(DatabaseHelper.KEYWORD_LIST, article.getKeywordList().getKeyword().toString());
+                values.put(DatabaseHelper.VOLUME, article.getJournalInfo().getVolume());
+                values.put(DatabaseHelper.ISSUE, article.getJournalInfo().getIssue());
+                values.put(DatabaseHelper.YEAR_OF_PUBLICATION, article.getJournalInfo().getYearOfPublication());
+                values.put(DatabaseHelper.CITED, article.getCitedByCount());
+                db.insert(DatabaseHelper.TABLE_NAME, DatabaseHelper.ARTICLE_TITLE, values);
+            }
+            return doQuery(); // ensure view is refreshed
+        }
+
+    }
+
+
+    // delete records from the database
+    private class DeleteTask extends BaseTask<Void> {
+        @Override
+        protected Cursor doInBackground(Void... params) {
+            // delete all rows from the table
+            mHelper.getWritableDatabase().execSQL("DELETE * FROM " + DatabaseHelper.TABLE_NAME);
+            return doQuery();
+        }
+    }
 
 }

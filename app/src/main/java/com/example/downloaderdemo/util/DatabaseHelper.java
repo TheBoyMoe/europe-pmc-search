@@ -10,24 +10,24 @@ public class DatabaseHelper extends SQLiteOpenHelper{
     private static final int VERSION = 1;
     private static volatile DatabaseHelper DATABASE_HELPER = null;
 
-    // TODO table columns
-    static final String TABLE_NAME = "journals";
-    static final String ARTICLE_ID = "articleId";
-    static final String ARTICLE_TITLE = "title";
-    static final String JOURNAL_TITLE = "journalTitle";
-    static final String AUTHOR_STRING = "authorString";
-    static final String JOURNAL_INFO = "journalInfo";
-    static final String PAGE_INFO = "pageInfo";
-    static final String ABSTRACT_TEXT = "abstractText";
-    static final String KEYWORD_LIST = "keywordList";
-    static final String VOLUME = "volume";
-    static final String ISSUE = "issue";
-    static final String YEAR_OF_PUBLICATION = "yearOfPublication";
-    static final String CITED = "cited";
+    // table columns
+    public static final String TABLE_NAME = "journals";
+    public static final String ARTICLE_ID = "articleId";
+    public static final String ARTICLE_TITLE = "title";
+    public static final String JOURNAL_TITLE = "journalTitle";
+    public static final String AUTHOR_STRING = "authorString";
+    public static final String JOURNAL_INFO = "journalInfo";
+    public static final String PAGE_INFO = "pageInfo";
+    public static final String ABSTRACT_TEXT = "abstractText";
+    public static final String KEYWORD_LIST = "keywordList";
+    public static final String VOLUME = "volume";
+    public static final String ISSUE = "issue";
+    public static final String YEAR_OF_PUBLICATION = "yearOfPublication";
+    public static final String CITED = "cited";
 
 
     // instantiate an instance of the dbase helper available to any activity/fragment
-    synchronized static DatabaseHelper getInstance(Context context) {
+    public synchronized static DatabaseHelper getInstance(Context context) {
         if(DATABASE_HELPER == null) {
             DATABASE_HELPER = new DatabaseHelper(context.getApplicationContext());
         }
@@ -47,7 +47,6 @@ public class DatabaseHelper extends SQLiteOpenHelper{
                 ARTICLE_TITLE + " TEXT," +
                 JOURNAL_TITLE + " TEXT," +
                 AUTHOR_STRING + " TEXT," +
-                JOURNAL_INFO + " TEXT," +
                 PAGE_INFO + " TEXT," +
                 ABSTRACT_TEXT + " TEXT," +
                 KEYWORD_LIST + " TEXT," +
@@ -62,4 +61,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
         onCreate(db);
     }
+
+
+
 }

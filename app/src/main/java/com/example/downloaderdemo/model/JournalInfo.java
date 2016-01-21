@@ -33,6 +33,21 @@ public class JournalInfo implements Parcelable {
         return journal;
     }
 
+    public void setIssue(String issue) {
+        this.issue = issue;
+    }
+
+    public void setVolume(String volume) {
+        this.volume = volume;
+    }
+
+    public void setJournal(Journal journal) {
+        this.journal = journal;
+    }
+
+    public void setYearOfPublication(Long yearOfPublication) {
+        this.yearOfPublication = yearOfPublication;
+    }
 
     @Override
     public int describeContents() {

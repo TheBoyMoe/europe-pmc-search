@@ -15,6 +15,9 @@ public class KeywordList implements Parcelable {
         return keyword;
     }
 
+    public void setKeyword(List<String> keyword) {
+        this.keyword = keyword;
+    }
 
     @Override
     public int describeContents() {
