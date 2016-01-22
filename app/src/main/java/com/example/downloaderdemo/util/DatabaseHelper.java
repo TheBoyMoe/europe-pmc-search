@@ -12,11 +12,11 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 
     // table columns
     public static final String TABLE_NAME = "journals";
+    public static final String ROW_ID = "_id";
     public static final String ARTICLE_ID = "articleId";
     public static final String ARTICLE_TITLE = "title";
     public static final String JOURNAL_TITLE = "journalTitle";
     public static final String AUTHOR_STRING = "authorString";
-    public static final String JOURNAL_INFO = "journalInfo";
     public static final String PAGE_INFO = "pageInfo";
     public static final String ABSTRACT_TEXT = "abstractText";
     public static final String KEYWORD_LIST = "keywordList";
@@ -43,16 +43,17 @@ public class DatabaseHelper extends SQLiteOpenHelper{
     public void onCreate(SQLiteDatabase db) {
         // SQL statement that creates dbase table
         db.execSQL("CREATE TABLE " + TABLE_NAME + " (" +
-                ARTICLE_ID + " TEXT," +
-                ARTICLE_TITLE + " TEXT," +
-                JOURNAL_TITLE + " TEXT," +
-                AUTHOR_STRING + " TEXT," +
-                PAGE_INFO + " TEXT," +
-                ABSTRACT_TEXT + " TEXT," +
-                KEYWORD_LIST + " TEXT," +
+                ROW_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                ARTICLE_ID + " TEXT, " +
+                ARTICLE_TITLE + " TEXT, " +
+                JOURNAL_TITLE + " TEXT, " +
+                AUTHOR_STRING + " TEXT, " +
+                PAGE_INFO + " TEXT, " +
+                ABSTRACT_TEXT + " TEXT, " +
+                KEYWORD_LIST + " TEXT, " +
                 VOLUME + " TEXT, " +
-                ISSUE + " TEXT," +
-                YEAR_OF_PUBLICATION + " TEXT," +
+                ISSUE + " TEXT, " +
+                YEAR_OF_PUBLICATION + " TEXT, " +
                 CITED + " TEXT);");
     }
 

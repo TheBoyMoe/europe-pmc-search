@@ -26,6 +26,7 @@
     <string name="divider_label">/</string>
     <string name="keywords_label">Keywords</string>
     <string name="na_label">n/a</string>
+    <string name="no_number">0</string>
     <string name="journal_label">Journal:</string>
     <string name="article_info_label">Article information</string>
 </resources>

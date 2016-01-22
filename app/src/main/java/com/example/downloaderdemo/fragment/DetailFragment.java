@@ -59,38 +59,28 @@ public class DetailFragment extends BaseFragment{
 
     private void populateFragmentElements() {
 
-        mArticleTitle.setText(validateStringValue(mArticle.getTitle()));
-        mAuthors.setText(validateStringValue(mArticle.getAuthorString()));
-        mPage.setText(validateStringValue(mArticle.getPageInfo()));
-        mCited.setText(validateLongValue(mArticle.getCitedByCount()));
-        mAbstract.setText(validateStringValue(mArticle.getAbstractText()));
+        mArticleTitle.setText(mArticle.getTitle());
+        mAuthors.setText(mArticle.getAuthorString());
+        mPage.setText(mArticle.getPageInfo());
+        mAbstract.setText(mArticle.getAbstractText());
+        mCited.setText(String.valueOf(mArticle.getCitedByCount()));
 
-        if(mArticle.getJournalInfo() != null) {
-            mYearOfPublication.setText(validateLongValue(mArticle.getJournalInfo().getYearOfPublication()));
-            mVolume.setText(validateStringValue(mArticle.getJournalInfo().getVolume()));
-            mIssue.setText(validateStringValue(mArticle.getJournalInfo().getIssue()));
-
-            if(mArticle.getJournalInfo().getJournal() != null) {
-                mJournalTitle.setText(validateStringValue(mArticle.getJournalInfo().getJournal().getTitle()));
-            } else {
-                mJournalTitle.setText(R.string.na_label);
-            }
+        if(mArticle.getJournalInfo().getYearOfPublication() == 0) {
+            mYearOfPublication.setText(getString(R.string.na_label));
         } else {
-            mYearOfPublication.setText(R.string.na_label);
-            mVolume.setText(R.string.na_label);
-            mIssue.setText(R.string.na_label);
-            mJournalTitle.setText(R.string.na_label);
+            mYearOfPublication.setText(String.valueOf(mArticle.getJournalInfo().getYearOfPublication()));
         }
 
+        mVolume.setText(mArticle.getJournalInfo().getVolume());
+        mIssue.setText(mArticle.getJournalInfo().getIssue());
+        mJournalTitle.setText(mArticle.getJournalInfo().getJournal().getTitle());
 
-        if(mArticle.getKeywordList() != null && mArticle.getKeywordList().getKeyword() != null) {
+        if(mArticle.getKeywordList().getKeyword() != null) {
             ArrayList<String> keywords = (ArrayList<String>) mArticle.getKeywordList().getKeyword();
-            String str = keywords.toString();
-            mKeywords.setText(str.substring(1, str.length() - 1));
+            mKeywords.setText(keywords.toString());
         } else {
-            mKeywords.setText(R.string.na_label);
+            mKeywords.setText(getString(R.string.na_label));
         }
-
     }
 
     private void cacheFragmentElements() {
@@ -104,21 +94,6 @@ public class DetailFragment extends BaseFragment{
         mCited = (TextView) mView.findViewById(R.id.cited_times);
         mKeywords = (TextView) mView.findViewById(R.id.article_keywords);
         mAbstract = (TextView) mView.findViewById(R.id.article_abstract);
-    }
-
-    private String validateStringValue(String value) {
-        if(value != null && !value.equals("")){
-            return value;
-        } else {
-            return getString(R.string.na_label);
-        }
-    }
-
-    private String validateLongValue(Long value) {
-        if(value != null)
-            return String.valueOf(value);
-        else
-            return getString(R.string.na_label);
     }
 
 

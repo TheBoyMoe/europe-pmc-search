@@ -68,8 +68,7 @@ public class ModelFragment extends BaseFragment{
         }
         mQuery = event.getQuery();
         mCurrentPage = String.valueOf(event.getPageNumber());
-        Timber.i("Received event: query: %s, current page: %s, cache size %d",
-                            mQuery, mCurrentPage, mArticles.size());
+        Timber.i("Received event: query: %s, current page: %s", mQuery, mCurrentPage);
 
         if(mQuery != null && !mQuery.isEmpty()) {
             // execute the background thread

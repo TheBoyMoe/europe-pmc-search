@@ -47,6 +47,8 @@ import com.squareup.otto.Subscribe;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import timber.log.Timber;
@@ -90,17 +92,18 @@ public class DownloadFragment extends BaseFragment{
     private TextView mEmptyView;
     private LinearLayoutManager mLayoutManager;
     private String mQuery;
+    private boolean mFirstTimeIn;
     private View mView;
     private boolean mNewQuerySubmitted;
     private DatabaseHelper mHelper;
-    //private Cursor mCursor;
     private AsyncTask mTask;
     private String[] mProjection = {
-            "ROWID AS _id",
+            //"ROWID AS _id",
+            DatabaseHelper.ROW_ID,
+            DatabaseHelper.ARTICLE_ID,
             DatabaseHelper.ARTICLE_TITLE,
             DatabaseHelper.JOURNAL_TITLE,
             DatabaseHelper.AUTHOR_STRING,
-            DatabaseHelper.JOURNAL_INFO,
             DatabaseHelper.PAGE_INFO,
             DatabaseHelper.ABSTRACT_TEXT,
             DatabaseHelper.KEYWORD_LIST,
@@ -130,6 +133,7 @@ public class DownloadFragment extends BaseFragment{
     @Override
     public void onDestroy() {
         super.onDestroy();
+
         if(mTask != null) {
             // cancel any tasks that have not completed
             mTask.cancel(false);
@@ -168,19 +172,20 @@ public class DownloadFragment extends BaseFragment{
         mHelper = DatabaseHelper.getInstance(getActivity());
 
         if(savedInstanceState == null) {
+            mFirstTimeIn = true;
             mCurrentPage = 1;
             mLoading = false;
             // execute the last saved query
-            mQuery = QueryPreferences.getSavedQueryString(getActivity());
-            if(mQuery != null) {
+            // mQuery = QueryPreferences.getSavedQueryString(getActivity());
+            // if(mQuery != null) {
                 // getSearchResults(); // execute search in background thread
 
                 // load results from database
-                mTask = new QueryTask().execute();
+            mTask = new QueryTask().execute();
 
-            } else {
-                Utils.showSnackbar(getActivity().findViewById(R.id.coordinator_layout), "Enter a search query");
-            }
+            //} else {
+             //   Utils.showSnackbar(getActivity().findViewById(R.id.coordinator_layout), "Enter a search query");
+            //}
         } else {
             // re-set fragment state
             mCurrentPage = savedInstanceState.getInt(SAVED_CURRENT_PAGE);
@@ -188,7 +193,8 @@ public class DownloadFragment extends BaseFragment{
             mQuery = savedInstanceState.getString(SAVED_QUERY);
         }
 
-        if(mQuery == null || mArticleItems.size() == 0) {
+
+        if(mArticleItems.size() == 0) {
             mEmptyView.setVisibility(View.VISIBLE);
             mRecyclerView.setVisibility(View.GONE);
         }
@@ -220,6 +226,7 @@ public class DownloadFragment extends BaseFragment{
 
         return mView;
     }
+
 
     private void getSearchResults() {
         if(Utils.isClientConnected(getActivity())) {
@@ -296,11 +303,7 @@ public class DownloadFragment extends BaseFragment{
     public boolean onOptionsItemSelected(MenuItem item) {
         if(item.getItemId() == R.id.clear_search) {
 
-            // clear the saved query from shared prefs
-            QueryPreferences.setSavedQueryString(getActivity(), null);
-            Timber.i("Cleared shared prefs");
-
-            // clear user's search history
+            // clear user's search history & shared prefs
             if(sRecentSuggestions != null) {
                 ConfirmationDialogFragment dialog = new ConfirmationDialogFragment();
                 dialog.show(getFragmentManager(), "Clear history");
@@ -327,9 +330,15 @@ public class DownloadFragment extends BaseFragment{
 
         List<Article> resultList = event.getResultQuery().getResultList().getResult();
         if(resultList.size() > 0) {
+
+            // adding the results to the dbase - automatically executes a query which updates the UI
+            Article[] list = resultList.toArray(new Article[resultList.size()]);
+            mTask = new InsertTask().execute(list);
+
             // add new results to the adapter
-            mArticleItems.addAll(resultList);
-            mAdapter.notifyDataSetChanged();
+            //mArticleItems.addAll(resultList); // ??
+            //mAdapter.notifyDataSetChanged(); // ??
+
             mRecyclerView.setVisibility(View.VISIBLE);
             mEmptyView.setVisibility(View.GONE);
             if(mCurrentPage > 1) {
@@ -337,15 +346,12 @@ public class DownloadFragment extends BaseFragment{
             }
             ++mCurrentPage;
 
-            // convert list to array and execute insert task, adding the results to the dbase
-            Article[] list = resultList.toArray(new Article[resultList.size()]);
-            mTask = new InsertTask().execute(list);
-
         } else {
             // no results returned
             mRecyclerView.setVisibility(View.GONE);
             mEmptyView.setVisibility(View.VISIBLE);
             Utils.showSnackbar(mView, "No results found");
+
         }
 
     }
@@ -431,28 +437,23 @@ public class DownloadFragment extends BaseFragment{
 
 
         public void bindJournal(Article article) {
+
+            // article object read back from the database
             mArticle = article;
-            articleTitle.setText(validateStringValue(mArticle.getTitle()));
-            articleAuthors.setText(validateStringValue(mArticle.getAuthorString()));
-            pageInformation.setText(validateStringValue(mArticle.getPageInfo()));
-             //cited.setText(validateLongValue(mArticle.getCitedByCount()));
 
-            if(mArticle.getJournalInfo() != null) {
-                yearOfPublication.setText(validateLongValue(mArticle.getJournalInfo().getYearOfPublication()));
-                journalVolume.setText(validateStringValue(mArticle.getJournalInfo().getVolume()));
-                journalIssue.setText(validateStringValue(mArticle.getJournalInfo().getIssue()));
+            articleTitle.setText(mArticle.getTitle());
+            articleAuthors.setText(mArticle.getAuthorString());
+            pageInformation.setText(mArticle.getPageInfo());
 
-                if(mArticle.getJournalInfo().getJournal() != null) {
-                    journalTitle.setText(validateStringValue(mArticle.getJournalInfo().getJournal().getTitle()));
-                } else {
-                    journalTitle.setText(R.string.na_label);
-                }
+            if(mArticle.getJournalInfo().getYearOfPublication() == 0) {
+                yearOfPublication.setText(getString(R.string.na_label));
             } else {
-                yearOfPublication.setText(R.string.na_label);
-                journalVolume.setText(R.string.na_label);
-                journalIssue.setText(R.string.na_label);
-                journalTitle.setText(R.string.na_label);
+                yearOfPublication.setText(String.valueOf(mArticle.getJournalInfo().getYearOfPublication()));
             }
+
+            journalVolume.setText(mArticle.getJournalInfo().getVolume());
+            journalIssue.setText(mArticle.getJournalInfo().getIssue());
+            journalTitle.setText(mArticle.getJournalInfo().getJournal().getTitle());
 
             setChecked(mAdapter.isChecked(getAdapterPosition()));
         }
@@ -473,22 +474,23 @@ public class DownloadFragment extends BaseFragment{
         }
 
 
-        private String validateStringValue(String value) {
-            if(value != null && !value.equals("")){
-                return value;
-            } else {
-                return getString(R.string.na_label);
-            }
+    }
+
+
+    private String validateStringValue(String value) {
+        if(value != null && !value.equals("")){
+            return value;
+        } else {
+            return getString(R.string.na_label);
         }
-
-        private String validateLongValue(Long value) {
-            if(value != null)
-                return String.valueOf(value);
-            else
-                return getString(R.string.na_label);
-        }
+    }
 
 
+    private String validateLongValue(Long value) {
+        if(value != null)
+            return String.valueOf(value);
+        else
+            return getString(R.string.na_label);
     }
 
 
@@ -508,6 +510,11 @@ public class DownloadFragment extends BaseFragment{
                                     sRecentSuggestions.clearHistory();
                                     sRecentSuggestions = null;
                                     Utils.showSnackbar(getActivity().findViewById(R.id.coordinator_layout), "Search history cleared");
+
+                                    // clear the saved query from shared prefs
+                                    QueryPreferences.setSavedQueryString(getActivity(), null);
+
+                                    Timber.i("Cleared shared prefs & SearchView history");
                                 }
                             })
                     .setNegativeButton(R.string.confirmation_dialog_negative_button,
@@ -530,22 +537,30 @@ public class DownloadFragment extends BaseFragment{
         @Override
         protected void onPostExecute(Cursor cursor) {
 
+            if(cursor.getCount() == 0) {
+                Utils.showSnackbar(mView, "Enter a search query");
+                return;
+            }
+
+            // TODO delete dbase after first time on subsequent searches, results added to previous
+            // check if query=null and record count
+
             // convert the cursor to an arraylist of Article Pojos update the adapter
-            Article article = new Article();
+            Article article;
             JournalInfo journalInfo = new JournalInfo();
             Journal journal = new Journal();
             KeywordList keywordList = new KeywordList();
             mArticleItems.clear();
-
             while(cursor.moveToNext()) {
-
+                article = new Article();
                 // populate article fields
+                article.setRowid(cursor.getInt(cursor.getColumnIndex(DatabaseHelper.ROW_ID)));
                 article.setId(cursor.getString(cursor.getColumnIndex(DatabaseHelper.ARTICLE_ID)));
                 article.setTitle(cursor.getString(cursor.getColumnIndex(DatabaseHelper.ARTICLE_TITLE)));
                 article.setAuthorString(cursor.getString(cursor.getColumnIndex(DatabaseHelper.AUTHOR_STRING)));
                 article.setPageInfo(cursor.getString(cursor.getColumnIndex(DatabaseHelper.PAGE_INFO)));
                 article.setAbstractText(cursor.getString(cursor.getColumnIndex(DatabaseHelper.ABSTRACT_TEXT)));
-                article.setCitedByCount(Long.valueOf(cursor.getString(cursor.getColumnIndex(DatabaseHelper.ARTICLE_ID))));
+                article.setCitedByCount(Long.valueOf(cursor.getString(cursor.getColumnIndex(DatabaseHelper.CITED))));
 
                 // populate journalInfo fields
                 journalInfo.setIssue(cursor.getString(cursor.getColumnIndex(DatabaseHelper.ISSUE)));
@@ -556,8 +571,11 @@ public class DownloadFragment extends BaseFragment{
                 journal.setTitle(cursor.getString(cursor.getColumnIndex(DatabaseHelper.JOURNAL_TITLE)));
 
                 // populate Keywords List field
+                List<String> keywords = null;
                 String str = cursor.getString(cursor.getColumnIndex(DatabaseHelper.KEYWORD_LIST));
-                List<String> keywords = Arrays.asList(str.split("\\s*,\\s*"));
+                if(!str.equals(getString(R.string.na_label))) {
+                    keywords = Arrays.asList(str.split("\\s*,\\s*"));
+                }
                 keywordList.setKeyword(keywords);
 
                 // add the objects to article
@@ -568,12 +586,32 @@ public class DownloadFragment extends BaseFragment{
                 // add each article to the List of results
                 mArticleItems.add(article);
             }
-            // update the UI
+
+            // sort the arraylist into order by id
+//            Collections.sort(mArticleItems, new Comparator<Article>() {
+//                @Override
+//                public int compare(Article lhs, Article rhs) {
+//                    return lhs.getRowid().compareTo(rhs.getRowid());
+//                }
+//            });
+
+            // update the UI & close the cursor
             mAdapter.notifyDataSetChanged();
+            mRecyclerView.setVisibility(View.VISIBLE);
+            mEmptyView.setVisibility(View.GONE);
+
+            // FIXME
+            if(mFirstTimeIn) {
+                Utils.showSnackbar(mView, "Previously saved results");
+                mFirstTimeIn = false;
+            }
+            cursor.close();
 
         }
 
-        //  execute query in doInBackground(), resulting cursor passed to onPostExecute()
+        String sortOrder = DatabaseHelper.ROW_ID + " ASC";
+        // execute query in doInBackground() of the insert/query/delete tasks
+        // resulting cursor passed to onPostExecute()
         protected Cursor doQuery() {
             Cursor result = mHelper.getReadableDatabase()
                     .query(DatabaseHelper.TABLE_NAME,
@@ -582,10 +620,12 @@ public class DownloadFragment extends BaseFragment{
                             null,
                             null,
                             null,
-                            DatabaseHelper.ARTICLE_TITLE);
+                            sortOrder);
             result.getCount(); // ensure the query is executed
+            Timber.i("Query returned %d rows", result.getCount());
             return result;
         }
+
     }
 
 
@@ -593,6 +633,7 @@ public class DownloadFragment extends BaseFragment{
     private class QueryTask extends BaseTask<Void> {
         @Override
         protected Cursor doInBackground(Void... params) {
+            Timber.i("Executing query task on background thread");
             return doQuery();
         }
     }
@@ -600,9 +641,10 @@ public class DownloadFragment extends BaseFragment{
 
     // insert record into the database
     private class InsertTask extends BaseTask<Article> {
-
         @Override
         protected Cursor doInBackground(Article... params) {
+
+            Timber.i("Executing insert task on background thread");
 
             // iterate through the array of articles, inserting each in turn
             ContentValues values = new ContentValues();
@@ -610,22 +652,50 @@ public class DownloadFragment extends BaseFragment{
 
             for (Article article : params) {
                 values.clear();
-                values.put(DatabaseHelper.ARTICLE_ID, article.getId());
-                values.put(DatabaseHelper.ARTICLE_TITLE, article.getTitle());
-                values.put(DatabaseHelper.JOURNAL_TITLE, article.getJournalInfo().getJournal().getTitle());
-                values.put(DatabaseHelper.AUTHOR_STRING, article.getAuthorString());
-                values.put(DatabaseHelper.PAGE_INFO, article.getPageInfo());
-                values.put(DatabaseHelper.ABSTRACT_TEXT, article.getAbstractText());
-                values.put(DatabaseHelper.KEYWORD_LIST, article.getKeywordList().getKeyword().toString());
-                values.put(DatabaseHelper.VOLUME, article.getJournalInfo().getVolume());
-                values.put(DatabaseHelper.ISSUE, article.getJournalInfo().getIssue());
-                values.put(DatabaseHelper.YEAR_OF_PUBLICATION, article.getJournalInfo().getYearOfPublication());
-                values.put(DatabaseHelper.CITED, article.getCitedByCount());
+                values.put(DatabaseHelper.ARTICLE_ID, validateStringValue(article.getId()));
+                values.put(DatabaseHelper.ARTICLE_TITLE, validateStringValue(article.getTitle()));
+                values.put(DatabaseHelper.AUTHOR_STRING, validateStringValue(article.getAuthorString()));
+                values.put(DatabaseHelper.PAGE_INFO, validateStringValue(article.getPageInfo()));
+                values.put(DatabaseHelper.ABSTRACT_TEXT, validateStringValue(article.getAbstractText()));
+
+                if(article.getCitedByCount() != null) {
+                    values.put(DatabaseHelper.CITED, article.getCitedByCount());
+                } else {
+                    values.put(DatabaseHelper.CITED, getString(R.string.no_number));
+                }
+
+                if(article.getJournalInfo() != null) {
+                    values.put(DatabaseHelper.VOLUME, validateStringValue(article.getJournalInfo().getVolume()));
+                    values.put(DatabaseHelper.ISSUE, validateStringValue(article.getJournalInfo().getIssue()));
+
+                    if(article.getJournalInfo().getYearOfPublication() != null) {
+                        values.put(DatabaseHelper.YEAR_OF_PUBLICATION, article.getJournalInfo().getYearOfPublication());
+                    } else {
+                        values.put(DatabaseHelper.YEAR_OF_PUBLICATION, getString(R.string.no_number));
+                    }
+
+                    if(article.getJournalInfo().getJournal() != null) {
+                        values.put(DatabaseHelper.JOURNAL_TITLE, validateStringValue(article.getJournalInfo().getJournal().getTitle()));
+                    } else {
+                        values.put(DatabaseHelper.JOURNAL_TITLE, getString(R.string.app_name));
+                    }
+                } else {
+                    values.put(DatabaseHelper.VOLUME, getString(R.string.na_label));
+                    values.put(DatabaseHelper.ISSUE, getString(R.string.na_label));
+                    values.put(DatabaseHelper.YEAR_OF_PUBLICATION, getString(R.string.no_number));
+                    values.put(DatabaseHelper.JOURNAL_TITLE, getString(R.string.na_label));
+                }
+
+                if(article.getKeywordList() != null && article.getKeywordList().getKeyword() != null) {
+                    values.put(DatabaseHelper.KEYWORD_LIST, validateStringValue(article.getKeywordList().getKeyword().toString()));
+                } else {
+                    values.put(DatabaseHelper.KEYWORD_LIST, getString(R.string.na_label));
+                }
+
                 db.insert(DatabaseHelper.TABLE_NAME, DatabaseHelper.ARTICLE_TITLE, values);
             }
             return doQuery(); // ensure view is refreshed
         }
-
     }
 
 
@@ -633,8 +703,9 @@ public class DownloadFragment extends BaseFragment{
     private class DeleteTask extends BaseTask<Void> {
         @Override
         protected Cursor doInBackground(Void... params) {
-            // delete all rows from the table
-            mHelper.getWritableDatabase().execSQL("DELETE * FROM " + DatabaseHelper.TABLE_NAME);
+            Timber.i("Executing delete task on background thread");
+            // delete the table
+            mHelper.getWritableDatabase().delete(DatabaseHelper.TABLE_NAME, null, null);
             return doQuery();
         }
     }
