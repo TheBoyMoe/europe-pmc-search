@@ -8,10 +8,11 @@ import android.view.View;
 
 import com.example.downloaderdemo.EuroPMCApplication;
 import com.example.downloaderdemo.R;
-import com.example.downloaderdemo.activity.DetailActivity;
+import com.example.downloaderdemo.event.DataModelUpdateEvent;
 import com.example.downloaderdemo.event.OnListItemClickEvent;
-import com.example.downloaderdemo.fragment.DetailFragment;
-import com.example.downloaderdemo.fragment.DownloadFragment;
+import com.example.downloaderdemo.event.RefreshAdapterEvent;
+import com.example.downloaderdemo.fragment.ArticleListFragment;
+import com.example.downloaderdemo.fragment.ArticleDetailFragment;
 import com.example.downloaderdemo.fragment.ModelFragment;
 import com.example.downloaderdemo.model.Article;
 import com.squareup.otto.Subscribe;
@@ -20,6 +21,8 @@ public class MainActivity extends AppCompatActivity {
 
     public static final String MODEL_FRAGMENT_TAG = "model_fragment";
     private boolean mDualPane;
+    private ModelFragment mModelFragment;
+    private ArticleListFragment mArticleListFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,24 +32,24 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        ModelFragment modelFragment =
+        mModelFragment =
                 (ModelFragment) getFragmentManager().findFragmentByTag(MODEL_FRAGMENT_TAG);
-        if(modelFragment == null) {
+        if(mModelFragment == null) {
             getFragmentManager().beginTransaction()
                     .add(ModelFragment.newInstance(), MODEL_FRAGMENT_TAG)
                     .commit();
         }
 
-        DownloadFragment downloadFragment =
-                (DownloadFragment) getFragmentManager().findFragmentById(R.id.list_fragment_container);
-        if(downloadFragment == null) {
+        mArticleListFragment =
+                (ArticleListFragment) getFragmentManager().findFragmentById(R.id.list_fragment_container);
+        if(mArticleListFragment == null) {
             getFragmentManager().beginTransaction()
-                    .add(R.id.list_fragment_container, DownloadFragment.newInstance())
+                    .add(R.id.list_fragment_container, ArticleListFragment.newInstance())
                     .commit();
         }
 
-        if(downloadFragment != null && modelFragment != null)
-            downloadFragment.setModelDataSet(modelFragment.getModel());
+        if(mArticleListFragment != null && mModelFragment != null)
+            mArticleListFragment.setModelDataSet(mModelFragment.getModel());
 
         // determine if there is a frame in which to embed the detail fragment, eg on tablet
         View detailPane = findViewById(R.id.detail_fragment_container);
@@ -75,13 +78,25 @@ public class MainActivity extends AppCompatActivity {
             if(mDualPane) {
                 // swap the current fragment
                 getFragmentManager().beginTransaction()
-                        .replace(R.id.detail_fragment_container, DetailFragment.newInstance(article))
+                        .replace(R.id.detail_fragment_container, ArticleDetailFragment.newInstance(article))
                         .commit();
             } else {
                 // on phones
                 Intent intent = new Intent(this, DetailActivity.class);
-                intent.putExtra(DetailFragment.ARTICLE_ITEM, article);
+                intent.putExtra(ArticleDetailFragment.ARTICLE_ITEM, article);
                 startActivity(intent);
+            }
+        }
+    }
+
+
+    @Subscribe
+    public void hasDataModelBeenUpdated(DataModelUpdateEvent event) {
+        if(event.isDataModelUpToDate()) {
+            if(mArticleListFragment != null && mModelFragment != null) {
+                // pass a copy of the List of article objects to the ArticleListFragment
+                mArticleListFragment.setModelDataSet(mModelFragment.getModel());
+                EuroPMCApplication.postToBus(new RefreshAdapterEvent(true));
             }
         }
     }

@@ -28,7 +28,7 @@ public class DownloadFragmentTest {
 
     @Before
     public void setUp() throws Exception {
-        mFragment = DownloadFragment.newInstance();
+        mFragment = ArticleListFragment.newInstance();
         startFragment(mFragment);
     }
 

@@ -3,7 +3,7 @@ package com.example.downloaderdemo;
 import android.app.Fragment;
 import android.os.Build;
 
-import com.example.downloaderdemo.fragment.DownloadFragment;
+import com.example.downloaderdemo.fragment.ArticleListFragment;
 import com.example.downloaderdemo.fragment.ModelFragment;
 import com.example.downloaderdemo.activity.MainActivity;
 
@@ -49,6 +49,6 @@ public class MainActivityTest {
     public void shouldHaveDownloaderFragmentt() throws Exception {
         Fragment downloadFragment = mActivity.getFragmentManager().findFragmentById(R.id.list_fragment_container);
         assertNotNull(downloadFragment);
-        assertTrue(downloadFragment instanceof DownloadFragment);
+        assertTrue(downloadFragment instanceof ArticleListFragment);
     }
 }

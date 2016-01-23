@@ -3,7 +3,7 @@ package com.example.downloaderdemo.ui;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 
-import com.example.downloaderdemo.fragment.DownloadFragment.JournalViewHolder;
+import com.example.downloaderdemo.fragment.ArticleListFragment.JournalViewHolder;
 
 /**
  * Reference

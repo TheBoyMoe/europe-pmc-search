@@ -12,9 +12,7 @@ import com.example.downloaderdemo.model.Article;
 
 import java.util.ArrayList;
 
-import timber.log.Timber;
-
-public class DetailFragment extends BaseFragment{
+public class ArticleDetailFragment extends BaseFragment{
 
     public static final String ARTICLE_ITEM = "journal";
     private Article mArticle;
@@ -31,10 +29,10 @@ public class DetailFragment extends BaseFragment{
     private TextView mAbstract;
 
 
-    public DetailFragment() {}
+    public ArticleDetailFragment() {}
 
-    public static DetailFragment newInstance(Article article) {
-        DetailFragment fragment = new DetailFragment();
+    public static ArticleDetailFragment newInstance(Article article) {
+        ArticleDetailFragment fragment = new ArticleDetailFragment();
         Bundle args = new Bundle();
         args.putParcelable(ARTICLE_ITEM, article);
         fragment.setArguments(args);
