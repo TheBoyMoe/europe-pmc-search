@@ -13,7 +13,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.provider.SearchRecentSuggestions;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
@@ -47,8 +46,6 @@ import com.squareup.otto.Subscribe;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import timber.log.Timber;
@@ -98,7 +95,6 @@ public class DownloadFragment extends BaseFragment{
     private DatabaseHelper mHelper;
     private AsyncTask mTask;
     private String[] mProjection = {
-            //"ROWID AS _id",
             DatabaseHelper.ROW_ID,
             DatabaseHelper.ARTICLE_ID,
             DatabaseHelper.ARTICLE_TITLE,
@@ -156,7 +152,6 @@ public class DownloadFragment extends BaseFragment{
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        // RecyclerView recyclerView = (RecyclerView) inflater.inflate(R.layout.recycler_view, container, false);
         mView = inflater.inflate(R.layout.recycler_view, container, false);
         mEmptyView = (TextView) mView.findViewById(R.id.empty_view);
         mRecyclerView = (RecyclerView) mView.findViewById(R.id.recycler_view);
@@ -169,36 +164,33 @@ public class DownloadFragment extends BaseFragment{
         mAdapter = new JournalAdapter(mRecyclerView);
         mRecyclerView.setAdapter(mAdapter);
 
+        // default view - no records to show
+        mEmptyView.setVisibility(View.VISIBLE);
+        mRecyclerView.setVisibility(View.GONE);
+
         mHelper = DatabaseHelper.getInstance(getActivity());
+
+        // load any results saved in the database
+        mTask = new QueryTask().execute();
 
         if(savedInstanceState == null) {
             mFirstTimeIn = true;
-            mCurrentPage = 1;
             mLoading = false;
-            // execute the last saved query
-            // mQuery = QueryPreferences.getSavedQueryString(getActivity());
-            // if(mQuery != null) {
-                // getSearchResults(); // execute search in background thread
 
-                // load results from database
-            mTask = new QueryTask().execute();
+            // retrieve saved settings from shared prefs
+            mQuery = QueryPreferences.getSavedPrefValue(getActivity(), QueryPreferences.QUERY_STRING);
+            String page = QueryPreferences.getSavedPrefValue(getActivity(), QueryPreferences.CURRENT_PAGE);
+            if(page != null)
+                mCurrentPage = Integer.valueOf(page);
+            else
+                mCurrentPage = 1;
 
-            //} else {
-             //   Utils.showSnackbar(getActivity().findViewById(R.id.coordinator_layout), "Enter a search query");
-            //}
         } else {
             // re-set fragment state
             mCurrentPage = savedInstanceState.getInt(SAVED_CURRENT_PAGE);
             mLoading = savedInstanceState.getBoolean(SAVED_LOADING);
             mQuery = savedInstanceState.getString(SAVED_QUERY);
         }
-
-
-        if(mArticleItems.size() == 0) {
-            mEmptyView.setVisibility(View.VISIBLE);
-            mRecyclerView.setVisibility(View.GONE);
-        }
-
 
         // implement endless scrolling
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -271,6 +263,9 @@ public class DownloadFragment extends BaseFragment{
                 // reset the page number
                 mCurrentPage = 1;
 
+                // reset firstTimeIn flag
+                mFirstTimeIn = false;
+
                 // hide the soft keyboard
                 Utils.hideKeyboard(getActivity(), mSearchView.getWindowToken());
 
@@ -285,7 +280,7 @@ public class DownloadFragment extends BaseFragment{
                 // post the query submitted by the user to the bus and save it to shared prefs
                 //postToAppBus(new QueryEvent(mQuery, mCurrentPage));
                 getSearchResults();
-                QueryPreferences.setSavedQueryString(getActivity(), mQuery);
+                QueryPreferences.setSavedPrefValue(getActivity(), QueryPreferences.QUERY_STRING, mQuery);
 
                 return true;
             }
@@ -335,23 +330,14 @@ public class DownloadFragment extends BaseFragment{
             Article[] list = resultList.toArray(new Article[resultList.size()]);
             mTask = new InsertTask().execute(list);
 
-            // add new results to the adapter
-            //mArticleItems.addAll(resultList); // ??
-            //mAdapter.notifyDataSetChanged(); // ??
-
             mRecyclerView.setVisibility(View.VISIBLE);
             mEmptyView.setVisibility(View.GONE);
             if(mCurrentPage > 1) {
                 Utils.showSnackbar(mView, "Downloading more items");
             }
             ++mCurrentPage;
-
-        } else {
-            // no results returned
-            mRecyclerView.setVisibility(View.GONE);
-            mEmptyView.setVisibility(View.VISIBLE);
+        } else if(resultList.size() == 0 && mQuery != null) {
             Utils.showSnackbar(mView, "No results found");
-
         }
 
     }
@@ -510,10 +496,6 @@ public class DownloadFragment extends BaseFragment{
                                     sRecentSuggestions.clearHistory();
                                     sRecentSuggestions = null;
                                     Utils.showSnackbar(getActivity().findViewById(R.id.coordinator_layout), "Search history cleared");
-
-                                    // clear the saved query from shared prefs
-                                    QueryPreferences.setSavedQueryString(getActivity(), null);
-
                                     Timber.i("Cleared shared prefs & SearchView history");
                                 }
                             })
@@ -530,20 +512,17 @@ public class DownloadFragment extends BaseFragment{
         }
     }
 
+    @Override
+    public void onStop() {
+        super.onStop();
+        QueryPreferences.setSavedPrefValue(getActivity(), QueryPreferences.CURRENT_PAGE, String.valueOf(mCurrentPage));
+    }
 
     // database helper methods
     private abstract class BaseTask<T> extends AsyncTask<T, Void, Cursor> {
 
         @Override
         protected void onPostExecute(Cursor cursor) {
-
-            if(cursor.getCount() == 0) {
-                Utils.showSnackbar(mView, "Enter a search query");
-                return;
-            }
-
-            // TODO delete dbase after first time on subsequent searches, results added to previous
-            // check if query=null and record count
 
             // convert the cursor to an arraylist of Article Pojos update the adapter
             Article article;
@@ -587,31 +566,26 @@ public class DownloadFragment extends BaseFragment{
                 mArticleItems.add(article);
             }
 
-            // sort the arraylist into order by id
-//            Collections.sort(mArticleItems, new Comparator<Article>() {
-//                @Override
-//                public int compare(Article lhs, Article rhs) {
-//                    return lhs.getRowid().compareTo(rhs.getRowid());
-//                }
-//            });
+            if(cursor.getCount() > 0) {
+                // update the UI & close the cursor
+                mAdapter.notifyDataSetChanged();
+                mRecyclerView.setVisibility(View.VISIBLE);
+                mEmptyView.setVisibility(View.GONE);
 
-            // update the UI & close the cursor
-            mAdapter.notifyDataSetChanged();
-            mRecyclerView.setVisibility(View.VISIBLE);
-            mEmptyView.setVisibility(View.GONE);
-
-            // FIXME
-            if(mFirstTimeIn) {
-                Utils.showSnackbar(mView, "Previously saved results");
-                mFirstTimeIn = false;
+                // first time in and found previously saved results
+                if(mFirstTimeIn) {
+                    Utils.showSnackbar(mView, "Previously saved results");
+                    mFirstTimeIn = false;
+                }
             }
-            cursor.close();
 
+            cursor.close();
         }
 
         String sortOrder = DatabaseHelper.ROW_ID + " ASC";
         // execute query in doInBackground() of the insert/query/delete tasks
         // resulting cursor passed to onPostExecute()
+        // TODO amend the projection to return only results containing the particular query field
         protected Cursor doQuery() {
             Cursor result = mHelper.getReadableDatabase()
                     .query(DatabaseHelper.TABLE_NAME,
@@ -633,7 +607,7 @@ public class DownloadFragment extends BaseFragment{
     private class QueryTask extends BaseTask<Void> {
         @Override
         protected Cursor doInBackground(Void... params) {
-            Timber.i("Executing query task on background thread");
+            Timber.i("Executing query task");
             return doQuery();
         }
     }
@@ -644,7 +618,7 @@ public class DownloadFragment extends BaseFragment{
         @Override
         protected Cursor doInBackground(Article... params) {
 
-            Timber.i("Executing insert task on background thread");
+            Timber.i("Executing insert task");
 
             // iterate through the array of articles, inserting each in turn
             ContentValues values = new ContentValues();
@@ -703,7 +677,7 @@ public class DownloadFragment extends BaseFragment{
     private class DeleteTask extends BaseTask<Void> {
         @Override
         protected Cursor doInBackground(Void... params) {
-            Timber.i("Executing delete task on background thread");
+            Timber.i("Executing delete task");
             // delete the table
             mHelper.getWritableDatabase().delete(DatabaseHelper.TABLE_NAME, null, null);
             return doQuery();

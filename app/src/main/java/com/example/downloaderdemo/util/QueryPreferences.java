@@ -10,17 +10,18 @@ import android.preference.PreferenceManager;
  */
 public class QueryPreferences {
 
-    private static final String QUERY_STRING = "query_string";
+    public static final String QUERY_STRING = "query_string";
+    public static final String CURRENT_PAGE = "current_page";
 
-    public static String getSavedQueryString(Context context) {
+    public static String getSavedPrefValue(Context context, String key) {
         return PreferenceManager.getDefaultSharedPreferences(context)
-                .getString(QUERY_STRING, null);
+                .getString(key, null);
     }
 
-    public static void setSavedQueryString(Context context, String query) {
+    public static void setSavedPrefValue(Context context, String key, String value) {
         PreferenceManager.getDefaultSharedPreferences(context)
                 .edit()
-                .putString(QUERY_STRING, query)
+                .putString(key, value)
                 .apply();
     }
 

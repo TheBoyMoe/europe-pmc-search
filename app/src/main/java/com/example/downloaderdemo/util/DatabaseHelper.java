@@ -41,6 +41,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+        // TODO add a column for the query
         // SQL statement that creates dbase table
         db.execSQL("CREATE TABLE " + TABLE_NAME + " (" +
                 ROW_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +

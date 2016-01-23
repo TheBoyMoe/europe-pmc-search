@@ -68,13 +68,13 @@ public class ModelFragment extends BaseFragment{
         }
         mQuery = event.getQuery();
         mCurrentPage = String.valueOf(event.getPageNumber());
-        Timber.i("Received event: query: %s, current page: %s", mQuery, mCurrentPage);
 
         if(mQuery != null && !mQuery.isEmpty()) {
             // execute the background thread
             if(!mIsStarted) {
                 mIsStarted = true;
                 new DownloaderThread().start();
+                Timber.i("Executing search for: %s, current page: %s", mQuery, mCurrentPage);
             }
         }
     }
