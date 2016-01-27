@@ -83,12 +83,12 @@ public class ArticleListFragment extends BaseFragment{
     private boolean mFirstTimeIn;
     private View mView;
     private boolean mNewQuerySubmitted;
-
+    //private int mCurrentPage;
 
     // endless scrolling variables
     private boolean mLoading = true;
     private int mPreviousTotal, mVisibleThreshold = 5, mFirstVisibleItem, mVisibleItemCount,
-                    mTotalItemCount, mCurrentPage;
+                    mTotalItemCount;
 
     public ArticleListFragment() { }
 
@@ -133,7 +133,7 @@ public class ArticleListFragment extends BaseFragment{
         mRecyclerView.setVisibility(View.GONE);
 
 
-        // TODO load any results saved in the database
+        // TODO load any results saved in the database on startup
         // mTask = new QueryTask().execute();
 
         if(savedInstanceState == null) {
@@ -141,16 +141,16 @@ public class ArticleListFragment extends BaseFragment{
             mLoading = false;
 
             // retrieve saved settings from shared prefs
-            mQuery = QueryPreferences.getSavedPrefValue(getActivity(), QueryPreferences.QUERY_STRING);
-            String page = QueryPreferences.getSavedPrefValue(getActivity(), QueryPreferences.CURRENT_PAGE);
-            if(page != null)
-                mCurrentPage = Integer.valueOf(page);
-            else
-                mCurrentPage = 1;
+            //mQuery = QueryPreferences.getSavedPrefValue(getActivity(), QueryPreferences.QUERY_STRING);
+            //String page = QueryPreferences.getSavedPrefValue(getActivity(), QueryPreferences.CURRENT_PAGE);
+            //if(page != null)
+            //    mCurrentPage = Integer.valueOf(page);
+            //else
+            //    mCurrentPage = 1;
 
         } else {
             // re-set fragment state
-            mCurrentPage = savedInstanceState.getInt(SAVED_CURRENT_PAGE);
+            //mCurrentPage = savedInstanceState.getInt(SAVED_CURRENT_PAGE);
             mLoading = savedInstanceState.getBoolean(SAVED_LOADING);
             mQuery = savedInstanceState.getString(SAVED_QUERY);
         }
@@ -185,7 +185,7 @@ public class ArticleListFragment extends BaseFragment{
 
     private void getSearchResults() {
         if(Utils.isClientConnected(getActivity())) {
-            postToAppBus(new QueryEvent(mQuery, mCurrentPage));
+            postToAppBus(new QueryEvent(mQuery));
         } else {
             Utils.showSnackbar(getActivity().findViewById(R.id.coordinator_layout), "No network connection");
         }
@@ -194,10 +194,9 @@ public class ArticleListFragment extends BaseFragment{
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putInt(SAVED_CURRENT_PAGE, mCurrentPage);
+        //outState.putInt(SAVED_CURRENT_PAGE, mCurrentPage);
         outState.putBoolean(SAVED_LOADING, mLoading);
         outState.putString(SAVED_QUERY, mQuery);
-
         mAdapter.onSaveInstanceState(outState);
     }
 
@@ -217,14 +216,28 @@ public class ArticleListFragment extends BaseFragment{
         mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                if (mQuery != null && !mQuery.equals(query)) {
+                //if (mQuery != null && !mQuery.equals(query)) {
                     // new query has been submitted
-                    mNewQuerySubmitted = true;
-                }
-                mQuery = query;
+                 //   mNewQuerySubmitted = true;
+               // }
+               // mQuery = query;
 
                 // reset the page number
-                mCurrentPage = 1;
+               // mCurrentPage = 1;
+
+                if(query != null && !query.isEmpty()) {
+                    mQuery = query;
+
+                    // save the search query to the RecentSuggestionsProvider
+                    sRecentSuggestions = new SearchRecentSuggestions(getActivity(),
+                            QuerySuggestionProvider.AUTHORITY, QuerySuggestionProvider.MODE);
+                    sRecentSuggestions.saveRecentQuery(mQuery, null);
+
+                    getSearchResults();
+
+                } else {
+                    Utils.showSnackbar(mView, "Enter a search query");
+                }
 
                 // reset firstTimeIn flag
                 mFirstTimeIn = false;
@@ -234,17 +247,6 @@ public class ArticleListFragment extends BaseFragment{
 
                 // close the search view
                 mSearchMenuItem.collapseActionView();
-
-                // save the search query to the RecentSuggestionsProvider
-                sRecentSuggestions = new SearchRecentSuggestions(getActivity(),
-                        QuerySuggestionProvider.AUTHORITY, QuerySuggestionProvider.MODE);
-                sRecentSuggestions.saveRecentQuery(mQuery, null);
-
-                // post the query submitted by the user to the bus and save it to shared prefs
-                //postToAppBus(new QueryEvent(mQuery, mCurrentPage));
-                getSearchResults();
-                QueryPreferences.setSavedPrefValue(getActivity(), QueryPreferences.QUERY_STRING, mQuery);
-
                 return true;
             }
 
@@ -277,50 +279,16 @@ public class ArticleListFragment extends BaseFragment{
     @Override
     public void onStop() {
         super.onStop();
-        QueryPreferences.setSavedPrefValue(getActivity(), QueryPreferences.CURRENT_PAGE, String.valueOf(mCurrentPage));
+        //QueryPreferences.setSavedPrefValue(getActivity(), QueryPreferences.CURRENT_PAGE, String.valueOf(mCurrentPage));
     }
-
-
-
-
-//    @Subscribe
-//    public void getResultsOfSearchQuery(ResultQueryEvent event) {
-//
-//        // TODO remove the rest
-//        // clear the arraylist if a new query has been submitted
-//        if(mNewQuerySubmitted) {
-//            mNewQuerySubmitted = false;
-//            mArticleItems.clear();
-//            mPreviousTotal = 0;
-//
-//            // TODO delete records from the database
-//            // mTask =  new DeleteTask().execute();
-//        }
-//
-//        List<Article> resultList = event.getResultQuery().getResultList().getResult();
-//        if(resultList.size() > 0) {
-//
-//            // adding the results to the dbase - automatically executes a query which updates the UI
-//            Article[] list = resultList.toArray(new Article[resultList.size()]);
-//            mTask = new InsertTask().execute(list);
-//
-//            mRecyclerView.setVisibility(View.VISIBLE);
-//            mEmptyView.setVisibility(View.GONE);
-//            if(mCurrentPage > 1) {
-//                Utils.showSnackbar(mView, "Downloading more items");
-//            }
-//            ++mCurrentPage;
-//        } else if(resultList.size() == 0 && mQuery != null) {
-//            Utils.showSnackbar(mView, "No results found");
-//        }
-//
-//    }
 
 
     // populate the arraylist on device rotation
     public void setModelDataSet(ArrayList<Article> list) {
+        Timber.i("setDataModelSet() called, size: %d", list.size());
         mArticleItems = list;
     }
+
 
     @Subscribe
     public void hasAdapterBeenRefreshed(RefreshAdapterEvent event) {
@@ -463,6 +431,8 @@ public class ArticleListFragment extends BaseFragment{
                                     sRecentSuggestions.clearHistory();
                                     sRecentSuggestions = null;
                                     Utils.showSnackbar(getActivity().findViewById(R.id.coordinator_layout), "Search history cleared");
+                                    QueryPreferences.setSavedPrefValue(getActivity(), QueryPreferences.QUERY_STRING, null);
+                                    QueryPreferences.setSavedPrefValue(getActivity(), QueryPreferences.CURRENT_PAGE, null);
                                     Timber.i("Cleared shared prefs & SearchView history");
                                 }
                             })

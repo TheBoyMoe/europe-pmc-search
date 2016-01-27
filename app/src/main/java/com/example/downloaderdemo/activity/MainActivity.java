@@ -17,6 +17,8 @@ import com.example.downloaderdemo.fragment.ModelFragment;
 import com.example.downloaderdemo.model.Article;
 import com.squareup.otto.Subscribe;
 
+import timber.log.Timber;
+
 public class MainActivity extends AppCompatActivity {
 
     public static final String MODEL_FRAGMENT_TAG = "model_fragment";
@@ -48,8 +50,10 @@ public class MainActivity extends AppCompatActivity {
                     .commit();
         }
 
-        if(mArticleListFragment != null && mModelFragment != null)
+        if(mArticleListFragment != null && mModelFragment != null) {
             mArticleListFragment.setModelDataSet(mModelFragment.getModel());
+            Timber.i("List and Model fragments added to the stack");
+        }
 
         // determine if there is a frame in which to embed the detail fragment, eg on tablet
         View detailPane = findViewById(R.id.detail_fragment_container);
@@ -94,6 +98,7 @@ public class MainActivity extends AppCompatActivity {
     public void hasDataModelBeenUpdated(DataModelUpdateEvent event) {
         if(event.isDataModelUpToDate()) {
             if(mArticleListFragment != null && mModelFragment != null) {
+                Timber.i("Data model updated! & fragments attached");
                 // pass a copy of the List of article objects to the ArticleListFragment
                 mArticleListFragment.setModelDataSet(mModelFragment.getModel());
                 EuroPMCApplication.postToBus(new RefreshAdapterEvent(true));

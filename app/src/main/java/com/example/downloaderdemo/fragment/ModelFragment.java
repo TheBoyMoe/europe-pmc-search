@@ -24,6 +24,7 @@ import com.example.downloaderdemo.model.KeywordList;
 import com.example.downloaderdemo.model.ResultQuery;
 import com.example.downloaderdemo.network.DownloaderThread;
 import com.example.downloaderdemo.util.DatabaseHelper;
+import com.example.downloaderdemo.util.QueryPreferences;
 import com.example.downloaderdemo.util.Utils;
 import com.google.gson.Gson;
 import com.squareup.otto.Subscribe;
@@ -46,6 +47,7 @@ import timber.log.Timber;
  */
 public class ModelFragment extends BaseFragment{
 
+    // instance variables
     private boolean mIsStarted = false;
     private List<Article> mArticles = new ArrayList<>();
     private String mQuery;
@@ -90,26 +92,33 @@ public class ModelFragment extends BaseFragment{
 
     @Subscribe
     public void getSearchQuery(QueryEvent event) {
+        String searchQuery = event.getQuery();
 
-        if(mQuery != null && event.getQuery() != null) {
-            if(!mQuery.equals(event.getQuery())) {
-                // new query is received
-                //mArticles.clear();
-                mTask = new DeleteTask().execute();
-            }
-        }
-        mQuery = event.getQuery();
-        mCurrentPage = event.getPageNumber();
+        // get the last saved search query & page count
+        mQuery = QueryPreferences.getSavedPrefValue(getActivity(), QueryPreferences.QUERY_STRING);
+        String page = QueryPreferences.getSavedPrefValue(getActivity(), QueryPreferences.CURRENT_PAGE);
+        mCurrentPage = page != null ? Integer.valueOf(page) : 1;
+        Timber.i("Retrieved page count: %s, retrieved query: %s", page, mQuery);
 
-        if(mQuery != null && !mQuery.isEmpty()) {
-            // execute the background thread
-            if(!mIsStarted) {
-                mIsStarted = true;
-                new DownloaderThread(mQuery, String.valueOf(mCurrentPage)).start();
-                Timber.i("Executing search for: %s, current page: %s", mQuery, mCurrentPage);
-            }
+        if(mQuery == null || !mQuery.equals(searchQuery)) {
+            // if it's the first time thru or a new query
+            mTask = new DeleteTask().execute();
+            mQuery = searchQuery;
+            mCurrentPage = 1;
         }
+
+
+        // execute the background thread
+        if(!mIsStarted) {
+            mIsStarted = true;
+            new DownloaderThread(mQuery, String.valueOf(mCurrentPage)).start();
+            Timber.i("Executing search for: %s, current page: %s", mQuery, mCurrentPage);
+        }
+
+        QueryPreferences.setSavedPrefValue(getActivity(), QueryPreferences.QUERY_STRING, mQuery);
     }
+
+
 
     @Subscribe
     public void getIsTreadRunningEvent(IsThreadRunningEvent event) {
@@ -129,11 +138,18 @@ public class ModelFragment extends BaseFragment{
             //if(mCurrentPage > 1) {
                 //Utils.showSnackbar(mView, "Downloading more items");
             //}
+
+            // update the page number & save
             ++mCurrentPage;
+
         } else if(resultList.size() == 0 && mQuery != null) {
             Utils.showSnackbar(getActivity().findViewById(R.id.coordinator_layout), "No results found");
         }
+        Timber.i("Next page count: %d", mCurrentPage);
+        QueryPreferences.setSavedPrefValue(getActivity(),
+                QueryPreferences.CURRENT_PAGE, String.valueOf(mCurrentPage));
     }
+
 
     @Override
     public void onDestroy() {
@@ -149,6 +165,7 @@ public class ModelFragment extends BaseFragment{
 
 
     public ArrayList<Article> getModel() {
+        Timber.i("getModel() called, size: %d", mArticles.size());
         return new ArrayList<>(mArticles);
     }
 
@@ -205,7 +222,9 @@ public class ModelFragment extends BaseFragment{
                 mArticles.add(article);
             }
 
-            // TODO ?? required
+            Timber.i("Cache contains %d records", mArticles.size());
+            //Timber.i("Records: %s", mArticles.toString());
+
 //            if(cursor.getCount() > 0) {
 //                // update the UI & close the cursor
 //                mAdapter.notifyDataSetChanged();
@@ -240,7 +259,7 @@ public class ModelFragment extends BaseFragment{
                             null,
                             sortOrder);
             result.getCount(); // ensure the query is executed
-            Timber.i("Query returned %d rows", result.getCount());
+            Timber.i("Querying the database, returned %d rows", result.getCount());
             return result;
         }
 
@@ -248,7 +267,7 @@ public class ModelFragment extends BaseFragment{
 
 
     // query the database, returning all records based on the projection
-    private class QueryTask extends BaseTask<Void> {
+    public class QueryTask extends BaseTask<Void> {
         @Override
         protected Cursor doInBackground(Void... params) {
             Timber.i("Executing query task");
@@ -321,7 +340,7 @@ public class ModelFragment extends BaseFragment{
     private class DeleteTask extends BaseTask<Void> {
         @Override
         protected Cursor doInBackground(Void... params) {
-            Timber.i("Executing delete task");
+            Timber.i("Deleting current records from the table");
             // delete the table
             mHelper.getWritableDatabase().delete(DatabaseHelper.TABLE_NAME, null, null);
             return doQuery();
@@ -345,71 +364,5 @@ public class ModelFragment extends BaseFragment{
             return getString(R.string.na_label);
     }
 
-
-//    class DownloaderThread extends Thread {
-//
-//        // http://www.ebi.ac.uk/europepmc/webservices/rest/search?query=malaria&resulttype=core&format=json&pageSize=5&dataset=fulltext&page=5
-//
-//        public DownloaderThread() { }
-//
-//        @Override
-//        public void run() {
-//            if(!isInterrupted()) {
-//
-//                // uri parameters
-//                String format = "json"; // json, xml, dc
-//                String dataset = "fulltext";
-//                String resultType = "core"; // returns full meta-data for the journal
-//                String pageSize = "12"; // no. of records returned
-//
-//                // uri constants
-//                final String SEARCH_BASE_URL =
-//                        "http://www.ebi.ac.uk/europepmc/webservices/rest/search";
-//                final String QUERY_PARAM = "query";
-//                final String FORMAT_PARAM = "format";
-//                final String RESULT_TYPE_PARAM = "resulttype";
-//                final String DATA_SET_PARAM = "dataset";
-//                final String PAGE_PARAM = "page";
-//                final String PAGE_SIZE = "pageSize";
-//
-//                Uri uri = Uri.parse(SEARCH_BASE_URL).buildUpon()
-//                        .appendQueryParameter(QUERY_PARAM, mQuery)
-//                        .appendQueryParameter(PAGE_PARAM, mCurrentPage)
-//                        .appendQueryParameter(PAGE_SIZE, pageSize)
-//                        .appendQueryParameter(RESULT_TYPE_PARAM, resultType)
-//                        .appendQueryParameter(DATA_SET_PARAM, dataset)
-//                        .appendQueryParameter(FORMAT_PARAM, format)
-//                        .build();
-//
-//                HttpURLConnection con = null;
-//
-//                try {
-//                    URL url = new URL(uri.toString());
-//                    Timber.i("Url: %s", url);
-//                    con = (HttpURLConnection) url.openConnection();
-//                    InputStream is = con.getInputStream();
-//                    BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-//
-//                    ResultQuery resultQuery = new Gson().fromJson(reader, ResultQuery.class);
-//                    EuroPMCApplication.postToBus(new ResultQueryEvent(resultQuery)); // post new results
-//
-//                    // add the results to the current journal list
-//                    mArticles.addAll(resultQuery.getResultList().getResult()); // add to the cache
-//
-//                    reader.close();
-//                    mIsStarted = false;
-//
-//                } catch (MalformedURLException e) {
-//                    Timber.e("Failure building the url: %s", e.getMessage());
-//                } catch (IOException e) {
-//                    Timber.e("Failure to open connection: %s", e.getMessage());
-//                } finally {
-//                    if(con != null)
-//                        con.disconnect();
-//                }
-//
-//            }
-//        }
-//    }
 
 }

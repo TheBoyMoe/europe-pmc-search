@@ -77,7 +77,7 @@ public class DownloaderThread extends Thread{
 
                 reader.close();
 
-                // Let who ever started the thread that it has finished
+                // Let who ever started the thread know that it has finished
                 EuroPMCApplication.postToBus(new IsThreadRunningEvent(false));
 
             } catch (MalformedURLException e) {
