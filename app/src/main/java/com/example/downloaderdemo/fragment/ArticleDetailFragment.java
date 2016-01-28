@@ -11,6 +11,7 @@ import com.example.downloaderdemo.R;
 import com.example.downloaderdemo.model.Article;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class ArticleDetailFragment extends BaseFragment{
 
@@ -74,8 +75,9 @@ public class ArticleDetailFragment extends BaseFragment{
         mJournalTitle.setText(mArticle.getJournalInfo().getJournal().getTitle());
 
         if(mArticle.getKeywordList().getKeyword() != null) {
-            ArrayList<String> keywords = (ArrayList<String>) mArticle.getKeywordList().getKeyword();
-            mKeywords.setText(keywords.toString());
+            List<String> keywords = mArticle.getKeywordList().getKeyword();
+            String list = keywords.toString().substring(2, keywords.toString().length() -2);
+            mKeywords.setText(list);
         } else {
             mKeywords.setText(getString(R.string.na_label));
         }

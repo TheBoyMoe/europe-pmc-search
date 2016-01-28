@@ -25,6 +25,7 @@ public class DownloaderThread extends Thread{
 
     private String mQuery;
     private String mCurrentPage;
+    public static final String PAGE_SIZE = "20";
 
     public DownloaderThread(String query, String currentPage) {
         mQuery = query;
@@ -39,7 +40,7 @@ public class DownloaderThread extends Thread{
             String format = "json"; // json, xml, dc
             String dataset = "fulltext";
             String resultType = "core"; // returns full meta-data for the journal
-            String pageSize = "12"; // no. of records returned
+            String pageSize = PAGE_SIZE; // no. of records returned
 
             // uri constants
             final String SEARCH_BASE_URL =

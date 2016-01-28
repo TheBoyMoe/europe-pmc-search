@@ -28,6 +28,7 @@ import com.example.downloaderdemo.event.OnListItemClickEvent;
 import com.example.downloaderdemo.event.QueryEvent;
 import com.example.downloaderdemo.event.RefreshAdapterEvent;
 import com.example.downloaderdemo.model.Article;
+import com.example.downloaderdemo.network.DownloaderThread;
 import com.example.downloaderdemo.ui.ChoiceCapableAdapter;
 import com.example.downloaderdemo.ui.HorizontalDivider;
 import com.example.downloaderdemo.ui.SingleChoiceMode;
@@ -67,7 +68,6 @@ import timber.log.Timber;
 
 public class ArticleListFragment extends BaseFragment{
 
-    private static final String SAVED_CURRENT_PAGE = "current page";
     private static final String SAVED_LOADING = "loading";
     private static final String SAVED_QUERY = "query";
 
@@ -82,13 +82,11 @@ public class ArticleListFragment extends BaseFragment{
     private String mQuery;
     private boolean mFirstTimeIn;
     private View mView;
-    private boolean mNewQuerySubmitted;
-    //private int mCurrentPage;
+
 
     // endless scrolling variables
     private boolean mLoading = true;
-    private int mPreviousTotal, mVisibleThreshold = 5, mFirstVisibleItem, mVisibleItemCount,
-                    mTotalItemCount;
+    private int mPreviousTotal, mVisibleThreshold = 5, mFirstVisibleItem, mVisibleItemCount, mTotalItemCount;
 
     public ArticleListFragment() { }
 
@@ -128,61 +126,45 @@ public class ArticleListFragment extends BaseFragment{
         mAdapter = new JournalAdapter(mRecyclerView);
         mRecyclerView.setAdapter(mAdapter);
 
-        updateUI();
-
-//        if(mArticleItems.size() > 0) {
-//            mAdapter.notifyDataSetChanged();
-//            mRecyclerView.setVisibility(View.VISIBLE);
-//            mEmptyView.setVisibility(View.GONE);
-//        } else {
-//            // no records to show
-//            mEmptyView.setVisibility(View.VISIBLE);
-//            mRecyclerView.setVisibility(View.GONE);
-//            Timber.i("HELLO Empty View Here!!!");
-//        }
+        // retrieve saved query, if there is one
+        mQuery = QueryPreferences.getSavedPrefValue(getActivity(), QueryPreferences.QUERY_STRING);
 
         if(savedInstanceState == null) {
             mFirstTimeIn = true;
             mLoading = false;
 
-            // retrieve saved settings from shared prefs
-            //mQuery = QueryPreferences.getSavedPrefValue(getActivity(), QueryPreferences.QUERY_STRING);
-            //String page = QueryPreferences.getSavedPrefValue(getActivity(), QueryPreferences.CURRENT_PAGE);
-            //if(page != null)
-            //    mCurrentPage = Integer.valueOf(page);
-            //else
-            //    mCurrentPage = 1;
-
         } else {
             // re-set fragment state
-            //mCurrentPage = savedInstanceState.getInt(SAVED_CURRENT_PAGE);
             mLoading = savedInstanceState.getBoolean(SAVED_LOADING);
             mQuery = savedInstanceState.getString(SAVED_QUERY);
         }
 
-        // TODO implement endless scrolling
-//        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-//            @Override
-//            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-//                super.onScrolled(recyclerView, dx, dy);
-//                mVisibleItemCount = recyclerView.getChildCount();
-//                mTotalItemCount = mLayoutManager.getItemCount();
-//                mFirstVisibleItem = mLayoutManager.findFirstVisibleItemPosition();
-//
-//                if(mLoading) {
-//                    if(mTotalItemCount > mPreviousTotal) {
-//                        mLoading = false;
-//                        mPreviousTotal = mTotalItemCount;
-//                    }
-//                }
-//                if(!mLoading && (mTotalItemCount - mVisibleItemCount)
-//                        <= (mFirstVisibleItem  + mVisibleThreshold)) {
-//                    // end of page has been reached, download more items
-//                    mLoading = true;
-//                    getSearchResults();
-//                }
-//            }
-//        });
+        // refresh the UI with any results returned from the dbase
+        updateUI();
+
+        // implement endless scrolling
+        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                mVisibleItemCount = recyclerView.getChildCount();
+                mTotalItemCount = mLayoutManager.getItemCount();
+                mFirstVisibleItem = mLayoutManager.findFirstVisibleItemPosition();
+
+                if(mLoading) {
+                    if(mTotalItemCount > mPreviousTotal) {
+                        mLoading = false;
+                        mPreviousTotal = mTotalItemCount;
+                    }
+                }
+                if(!mLoading && (mTotalItemCount - mVisibleItemCount)
+                        <= (mFirstVisibleItem  + mVisibleThreshold)) {
+                    // end of page has been reached, download more items
+                    mLoading = true;
+                    getSearchResults();
+                }
+            }
+        });
 
         return mView;
     }
@@ -190,7 +172,18 @@ public class ArticleListFragment extends BaseFragment{
 
     private void getSearchResults() {
         if(Utils.isClientConnected(getActivity())) {
-            postToAppBus(new QueryEvent(mQuery));
+            if(mQuery != null) {
+                postToAppBus(new QueryEvent(mQuery));
+                Timber.i("Posting query: %s to bus, ARTICLE SIZE: %d", mQuery, mArticleItems.size());
+                if(mArticleItems.size() == 0) {
+                    mEmptyView.setVisibility(View.GONE);
+                    mRecyclerView.setVisibility(View.GONE);
+                }
+
+
+            } else {
+                Utils.showSnackbar(mView, "No more results, enter a query");
+            }
         } else {
             Utils.showSnackbar(getActivity().findViewById(R.id.coordinator_layout), "No network connection");
         }
@@ -199,7 +192,6 @@ public class ArticleListFragment extends BaseFragment{
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        //outState.putInt(SAVED_CURRENT_PAGE, mCurrentPage);
         outState.putBoolean(SAVED_LOADING, mLoading);
         outState.putString(SAVED_QUERY, mQuery);
         mAdapter.onSaveInstanceState(outState);
@@ -221,16 +213,8 @@ public class ArticleListFragment extends BaseFragment{
         mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                //if (mQuery != null && !mQuery.equals(query)) {
-                    // new query has been submitted
-                 //   mNewQuerySubmitted = true;
-               // }
-               // mQuery = query;
 
-                // reset the page number
-               // mCurrentPage = 1;
-
-                if(query != null && !query.isEmpty()) {
+                if (query != null && !query.isEmpty()) {
                     mQuery = query;
 
                     // save the search query to the RecentSuggestionsProvider
@@ -264,6 +248,7 @@ public class ArticleListFragment extends BaseFragment{
 
     }
 
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if(item.getItemId() == R.id.clear_search) {
@@ -281,13 +266,6 @@ public class ArticleListFragment extends BaseFragment{
     }
 
 
-    @Override
-    public void onStop() {
-        super.onStop();
-        //QueryPreferences.setSavedPrefValue(getActivity(), QueryPreferences.CURRENT_PAGE, String.valueOf(mCurrentPage));
-    }
-
-
     public void setModelDataSet(ArrayList<Article> list) {
         Timber.i("setDataModelSet() called, size: %d", list.size());
         mArticleItems = list;
@@ -298,10 +276,21 @@ public class ArticleListFragment extends BaseFragment{
     public void hasAdapterBeenRefreshed(RefreshAdapterEvent event) {
         if(event.isRefreshAdapter()) {
             updateUI();
+            if(mFirstTimeIn) {
+                mFirstTimeIn = false;
+                if(mArticleItems.size() > 0)
+                    Utils.showSnackbar(mView, "Results returned from database");
+                else
+                    Utils.showSnackbar(mView, "No results saved to the database");
+            } else
+            if(mArticleItems.size() > Integer.valueOf(DownloaderThread.PAGE_SIZE)) {
+                Utils.showSnackbar(getActivity().findViewById(R.id.coordinator_layout), "Downloading more items");
+            }
         }
     }
 
     private void updateUI() {
+
         if(mArticleItems.size() > 0) {
             mAdapter.notifyDataSetChanged();
             mRecyclerView.setVisibility(View.VISIBLE);
@@ -445,9 +434,9 @@ public class ArticleListFragment extends BaseFragment{
                                 public void onClick(DialogInterface dialogInterface, int i) {
                                     sRecentSuggestions.clearHistory();
                                     sRecentSuggestions = null;
-                                    Utils.showSnackbar(getActivity().findViewById(R.id.coordinator_layout), "Search history cleared");
                                     QueryPreferences.setSavedPrefValue(getActivity(), QueryPreferences.QUERY_STRING, null);
                                     QueryPreferences.setSavedPrefValue(getActivity(), QueryPreferences.CURRENT_PAGE, null);
+                                    Utils.showSnackbar(getActivity().findViewById(R.id.coordinator_layout), "Search history cleared");
                                     Timber.i("Cleared shared prefs & SearchView history");
                                 }
                             })

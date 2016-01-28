@@ -110,17 +110,14 @@ public class ModelFragment extends BaseFragment{
             mCurrentPage = 1;
         }
 
-
         // execute the background thread
         if(!mIsStarted) {
             mIsStarted = true;
             new DownloaderThread(mQuery, String.valueOf(mCurrentPage)).start();
             Timber.i("Executing search for: %s, current page: %s", mQuery, mCurrentPage);
         }
-
         QueryPreferences.setSavedPrefValue(getActivity(), QueryPreferences.QUERY_STRING, mQuery);
     }
-
 
 
     @Subscribe
@@ -129,7 +126,7 @@ public class ModelFragment extends BaseFragment{
     }
 
     @Subscribe
-    public void getResultOfQueryEvent(ResultQueryEvent event) {
+    public void getResultOfQueryEvent(ResultQueryEvent event)  {
 
         List<Article> resultList = event.getResultQuery().getResultList().getResult();
         if(resultList.size() > 0) {
@@ -138,11 +135,7 @@ public class ModelFragment extends BaseFragment{
             Article[] list = resultList.toArray(new Article[resultList.size()]);
             mTask = new InsertTask().execute(list);
 
-            //if(mCurrentPage > 1) {
-                //Utils.showSnackbar(mView, "Downloading more items");
-            //}
-
-            // update the page number & save
+            // update the page number
             ++mCurrentPage;
 
         } else if(resultList.size() == 0 && mQuery != null) {
@@ -239,7 +232,6 @@ public class ModelFragment extends BaseFragment{
 
         }
 
-        // TODO amend the projection to return only results containing the particular query field
         // execute query in doInBackground() of the insert/query/delete tasks
         // resulting cursor passed to onPostExecute()
         String sortOrder = DatabaseHelper.ROW_ID + " ASC";
