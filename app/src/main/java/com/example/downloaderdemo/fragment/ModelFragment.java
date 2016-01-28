@@ -80,6 +80,9 @@ public class ModelFragment extends BaseFragment{
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
         mHelper = DatabaseHelper.getInstance(getActivity());
+
+        // check if any records exist and populate the data model
+        mTask = new QueryTask().execute();
     }
 
     @Nullable
@@ -182,12 +185,17 @@ public class ModelFragment extends BaseFragment{
 
             // convert the cursor to an arraylist of Article Pojos update the datacache
             Article article;
-            JournalInfo journalInfo = new JournalInfo();
-            Journal journal = new Journal();
-            KeywordList keywordList = new KeywordList();
+            JournalInfo journalInfo;
+            Journal journal;
+            KeywordList keywordList;
             mArticles.clear();
             while(cursor.moveToNext()) {
+
                 article = new Article();
+                journalInfo = new JournalInfo();
+                journal = new Journal();
+                keywordList = new KeywordList();
+
                 // populate article fields
                 article.setRowid(cursor.getInt(cursor.getColumnIndex(DatabaseHelper.ROW_ID)));
                 article.setId(cursor.getString(cursor.getColumnIndex(DatabaseHelper.ARTICLE_ID)));
@@ -223,20 +231,6 @@ public class ModelFragment extends BaseFragment{
             }
 
             Timber.i("Cache contains %d records", mArticles.size());
-            //Timber.i("Records: %s", mArticles.toString());
-
-//            if(cursor.getCount() > 0) {
-//                // update the UI & close the cursor
-//                mAdapter.notifyDataSetChanged();
-//                mRecyclerView.setVisibility(View.VISIBLE);
-//                mEmptyView.setVisibility(View.GONE);
-//
-//                // first time in and found previously saved results
-//                if(mFirstTimeIn) {
-//                    Utils.showSnackbar(mView, "Previously saved results");
-//                    mFirstTimeIn = false;
-//                }
-//            }
 
             cursor.close();
 
@@ -267,7 +261,7 @@ public class ModelFragment extends BaseFragment{
 
 
     // query the database, returning all records based on the projection
-    public class QueryTask extends BaseTask<Void> {
+    private class QueryTask extends BaseTask<Void> {
         @Override
         protected Cursor doInBackground(Void... params) {
             Timber.i("Executing query task");

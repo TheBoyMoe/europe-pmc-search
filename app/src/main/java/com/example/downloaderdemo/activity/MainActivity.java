@@ -36,23 +36,28 @@ public class MainActivity extends AppCompatActivity {
 
         mModelFragment =
                 (ModelFragment) getFragmentManager().findFragmentByTag(MODEL_FRAGMENT_TAG);
+
         if(mModelFragment == null) {
+
+            mModelFragment = ModelFragment.newInstance();
             getFragmentManager().beginTransaction()
-                    .add(ModelFragment.newInstance(), MODEL_FRAGMENT_TAG)
+                    .add(mModelFragment, MODEL_FRAGMENT_TAG)
                     .commit();
         }
 
         mArticleListFragment =
                 (ArticleListFragment) getFragmentManager().findFragmentById(R.id.list_fragment_container);
+
         if(mArticleListFragment == null) {
+
+            mArticleListFragment = ArticleListFragment.newInstance();
             getFragmentManager().beginTransaction()
-                    .add(R.id.list_fragment_container, ArticleListFragment.newInstance())
+                    .add(R.id.list_fragment_container, mArticleListFragment)
                     .commit();
         }
 
         if(mArticleListFragment != null && mModelFragment != null) {
             mArticleListFragment.setModelDataSet(mModelFragment.getModel());
-            Timber.i("List and Model fragments added to the stack");
         }
 
         // determine if there is a frame in which to embed the detail fragment, eg on tablet
@@ -60,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
         mDualPane = detailPane != null && detailPane.getVisibility() == View.VISIBLE;
 
     }
+
 
     @Override
     protected void onResume() {
@@ -94,16 +100,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    // notify the list fragment when the data model has been updated
     @Subscribe
     public void hasDataModelBeenUpdated(DataModelUpdateEvent event) {
         if(event.isDataModelUpToDate()) {
             if(mArticleListFragment != null && mModelFragment != null) {
-                Timber.i("Data model updated! & fragments attached");
+                Timber.i("Data model updated!");
                 // pass a copy of the List of article objects to the ArticleListFragment
                 mArticleListFragment.setModelDataSet(mModelFragment.getModel());
+
+                // notify the list fragment to refresh the view
                 EuroPMCApplication.postToBus(new RefreshAdapterEvent(true));
             }
         }
     }
+
 
 }

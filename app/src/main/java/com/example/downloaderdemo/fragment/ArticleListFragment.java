@@ -128,13 +128,18 @@ public class ArticleListFragment extends BaseFragment{
         mAdapter = new JournalAdapter(mRecyclerView);
         mRecyclerView.setAdapter(mAdapter);
 
-        // default view - no records to show
-        mEmptyView.setVisibility(View.VISIBLE);
-        mRecyclerView.setVisibility(View.GONE);
+        updateUI();
 
-
-        // TODO load any results saved in the database on startup
-        // mTask = new QueryTask().execute();
+//        if(mArticleItems.size() > 0) {
+//            mAdapter.notifyDataSetChanged();
+//            mRecyclerView.setVisibility(View.VISIBLE);
+//            mEmptyView.setVisibility(View.GONE);
+//        } else {
+//            // no records to show
+//            mEmptyView.setVisibility(View.VISIBLE);
+//            mRecyclerView.setVisibility(View.GONE);
+//            Timber.i("HELLO Empty View Here!!!");
+//        }
 
         if(savedInstanceState == null) {
             mFirstTimeIn = true;
@@ -283,7 +288,6 @@ public class ArticleListFragment extends BaseFragment{
     }
 
 
-    // populate the arraylist on device rotation
     public void setModelDataSet(ArrayList<Article> list) {
         Timber.i("setDataModelSet() called, size: %d", list.size());
         mArticleItems = list;
@@ -293,12 +297,23 @@ public class ArticleListFragment extends BaseFragment{
     @Subscribe
     public void hasAdapterBeenRefreshed(RefreshAdapterEvent event) {
         if(event.isRefreshAdapter()) {
-            mAdapter.notifyDataSetChanged();
-            mRecyclerView.setVisibility(View.VISIBLE);
-            mEmptyView.setVisibility(View.GONE);
+            updateUI();
         }
     }
 
+    private void updateUI() {
+        if(mArticleItems.size() > 0) {
+            mAdapter.notifyDataSetChanged();
+            mRecyclerView.setVisibility(View.VISIBLE);
+            mEmptyView.setVisibility(View.GONE);
+            Timber.i("Refreshing UI");
+        } else {
+            // no records to show
+            mEmptyView.setVisibility(View.VISIBLE);
+            mRecyclerView.setVisibility(View.GONE);
+            Timber.i("Empty data set, nothing to show!");
+        }
+    }
 
 
     private class JournalAdapter extends ChoiceCapableAdapter<JournalViewHolder> {

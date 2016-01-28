@@ -20,6 +20,7 @@ import timber.log.Timber;
 
 public class DownloaderThread extends Thread{
 
+    // no api key req'd
     // http://www.ebi.ac.uk/europepmc/webservices/rest/search?query=malaria&resulttype=core&format=json&pageSize=5&dataset=fulltext&page=5
 
     private String mQuery;
@@ -71,9 +72,6 @@ public class DownloaderThread extends Thread{
                 // use gson to parse the json and post the result to the bus
                 ResultQuery resultQuery = new Gson().fromJson(reader, ResultQuery.class);
                 EuroPMCApplication.postToBus(new ResultQueryEvent(resultQuery)); // post results
-
-                // add the results to the current journal list
-                //mArticles.addAll(resultQuery.getResultList().getResult()); // add to the cache
 
                 reader.close();
 
