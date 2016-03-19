@@ -176,11 +176,9 @@ public class ArticleListFragment extends BaseFragment{
                 postToAppBus(new QueryEvent(mQuery));
                 Timber.i("Posting query: %s to bus, ARTICLE SIZE: %d", mQuery, mArticleItems.size());
                 if(mArticleItems.size() == 0) {
-                    mEmptyView.setVisibility(View.GONE);
+                    mEmptyView.setVisibility(View.GONE); // ?? needs to be visible
                     mRecyclerView.setVisibility(View.GONE);
                 }
-
-
             } else {
                 Utils.showSnackbar(mView, "No more results, enter a query");
             }
