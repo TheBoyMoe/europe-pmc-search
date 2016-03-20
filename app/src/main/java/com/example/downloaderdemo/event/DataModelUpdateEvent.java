@@ -1,6 +1,6 @@
 package com.example.downloaderdemo.event;
 
-public class DataModelUpdateEvent extends BaseEvent{
+public class  DataModelUpdateEvent extends BaseEvent{
 
     private boolean mDataModelUpdate;
 

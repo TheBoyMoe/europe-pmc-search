@@ -2,11 +2,11 @@ package com.example.downloaderdemo.event;
 
 import com.example.downloaderdemo.model.ResultQuery;
 
-public class ResultQueryEvent extends BaseEvent{
+public class QueryCompletionEvent extends BaseEvent{
 
     private ResultQuery mResultQuery;
 
-    public ResultQueryEvent(ResultQuery resultQuery) {
+    public QueryCompletionEvent(ResultQuery resultQuery) {
         mResultQuery = resultQuery;
     }
 

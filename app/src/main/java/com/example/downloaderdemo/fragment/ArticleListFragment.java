@@ -25,7 +25,6 @@ import com.example.downloaderdemo.adapter.CustomItemDecoration;
 import com.example.downloaderdemo.adapter.ListItemAdapter;
 import com.example.downloaderdemo.event.QueryEvent;
 import com.example.downloaderdemo.model.Article;
-import com.example.downloaderdemo.network.DownloaderThread;
 import com.example.downloaderdemo.util.QueryPreferences;
 import com.example.downloaderdemo.util.QuerySuggestionProvider;
 import com.example.downloaderdemo.util.Utils;
@@ -62,8 +61,8 @@ public class ArticleListFragment extends BaseFragment{
 
     private static final String SAVED_LOADING = "loading";
     private static final String SAVED_QUERY = "query";
+    private static final String SAVED_FIRST_TIME_IN = "firstTimeIn";
 
-    private ArrayList<Article> mArticleItems = new ArrayList<>();
     private static SearchRecentSuggestions sRecentSuggestions;
     private SearchView mSearchView;
     private MenuItem mSearchMenuItem;
@@ -72,7 +71,7 @@ public class ArticleListFragment extends BaseFragment{
     private TextView mEmptyView;
     private LinearLayoutManager mLayoutManager;
     private String mQuery;
-    private boolean mFirstTimeIn;
+    private boolean mFirstTimeIn = true;
     private View mView;
 
 
@@ -88,10 +87,11 @@ public class ArticleListFragment extends BaseFragment{
 
 
     public void setModelDataSet(ArrayList<Article> list) {
+        Timber.e("setModelData called");
         mAdapter.clearAll();
         mAdapter.addAll(list);
         mAdapter.notifyDataSetChanged();
-        refreshDisplay();
+        updateUI();
     }
 
 
@@ -106,6 +106,7 @@ public class ArticleListFragment extends BaseFragment{
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
+        Timber.e("onCreateView Called");
         mView = inflater.inflate(R.layout.recycler_view, container, false);
         mEmptyView = (TextView) mView.findViewById(R.id.empty_view);
         mRecyclerView = (RecyclerView) mView.findViewById(R.id.recycler_view);
@@ -114,8 +115,8 @@ public class ArticleListFragment extends BaseFragment{
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.addItemDecoration(new CustomItemDecoration(getResources().getDimensionPixelSize(R.dimen.dimen_list_item_spacer)));
-        mAdapter = new ListItemAdapter(getActivity(), mArticleItems);
-        Timber.i("Create adapter: %s", mAdapter);
+        mAdapter = new ListItemAdapter(getActivity(), new ArrayList<Article>());
+
         if(isAdded())
             mRecyclerView.setAdapter(mAdapter);
 
@@ -123,12 +124,12 @@ public class ArticleListFragment extends BaseFragment{
         mQuery = QueryPreferences.getSavedPrefValue(getActivity(), QueryPreferences.QUERY_STRING);
 
         if(savedInstanceState == null) {
-            mFirstTimeIn = true;
             mLoading = false;
         } else {
             // re-set fragment state
             mLoading = savedInstanceState.getBoolean(SAVED_LOADING);
             mQuery = savedInstanceState.getString(SAVED_QUERY);
+            mFirstTimeIn = savedInstanceState.getBoolean(SAVED_FIRST_TIME_IN);
         }
 
         // implement endless scrolling
@@ -151,7 +152,7 @@ public class ArticleListFragment extends BaseFragment{
                         <= (mFirstVisibleItem  + mVisibleThreshold)) {
                     // end of page has been reached, download more items
                     mLoading = true;
-                    getSearchResults(); // download more results
+                    executeSearchQuery(); // download more results
                 }
             }
         });
@@ -161,16 +162,11 @@ public class ArticleListFragment extends BaseFragment{
 
 
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        updateUI();
-    }
-
-    @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean(SAVED_LOADING, mLoading);
         outState.putString(SAVED_QUERY, mQuery);
+        outState.putBoolean(SAVED_FIRST_TIME_IN, mFirstTimeIn);
     }
 
 
@@ -198,14 +194,11 @@ public class ArticleListFragment extends BaseFragment{
                             QuerySuggestionProvider.AUTHORITY, QuerySuggestionProvider.MODE);
                     sRecentSuggestions.saveRecentQuery(mQuery, null);
 
-                    getSearchResults();
+                    executeSearchQuery();
 
                 } else {
                     Utils.showSnackbar(mView, "Enter a search query");
                 }
-
-                // reset firstTimeIn flag
-                mFirstTimeIn = false;
 
                 // hide the soft keyboard
                 Utils.hideKeyboard(getActivity(), mSearchView.getWindowToken());
@@ -243,12 +236,12 @@ public class ArticleListFragment extends BaseFragment{
     }
 
 
-    private void getSearchResults() {
+    private void executeSearchQuery() {
         if(Utils.isClientConnected(getActivity())) {
             if(mQuery != null) {
                 // post a query, which will be executed by the thread
                 postToAppBus(new QueryEvent(mQuery));
-                if(mArticleItems.size() == 0) {
+                if(mAdapter.getItemCount() == 0) {
                     mEmptyView.setVisibility(View.GONE);
                     mRecyclerView.setVisibility(View.GONE);
                 }
@@ -261,31 +254,27 @@ public class ArticleListFragment extends BaseFragment{
     }
 
 
-    private void refreshDisplay() {
-        updateUI();
-        if(mFirstTimeIn) {
-            mFirstTimeIn = false;
-            if(mArticleItems.size() > 0)
-                Utils.showSnackbar(mView, "Results returned from database");
-            else
-                Utils.showSnackbar(mView, "No results saved to the database");
-        } else
-        if(mArticleItems.size() > Integer.valueOf(DownloaderThread.PAGE_SIZE)) {
-            Utils.showSnackbar(getActivity().findViewById(R.id.coordinator_layout), "Downloading more items, " + mArticleItems.size() + " so far");
-        }
-    }
-
     private void updateUI() {
-        if(mArticleItems.size() > 0) {
+        Timber.e("UpdateUI called, list size: %d, firstTimeIn: %s", mAdapter.getItemCount(), mFirstTimeIn);
+
+        if(mAdapter.getItemCount() > 0) {
             mRecyclerView.setVisibility(View.VISIBLE);
             mEmptyView.setVisibility(View.GONE);
-            Timber.i("Refreshing UI");
-        } else {
+            if(mFirstTimeIn) {
+                Timber.i("Results returned from database");
+                Utils.showSnackbar(mView, "Results returned from database");
+            }
+        }
+        else {
             // no records to show
             mEmptyView.setVisibility(View.VISIBLE);
             mRecyclerView.setVisibility(View.GONE);
-            Timber.i("Empty data set, nothing to show!");
+            if(mFirstTimeIn) {
+                Timber.i("Empty data set, nothing to show!");
+                Utils.showSnackbar(mView, "No results available in the database");
+            }
         }
+        mFirstTimeIn = false;
     }
 
 

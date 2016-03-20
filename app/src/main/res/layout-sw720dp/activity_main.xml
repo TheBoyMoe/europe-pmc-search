@@ -9,43 +9,6 @@
     android:fitsSystemWindows="true"
     tools:context=".activity.MainActivity">
 
-
-    <!--<LinearLayout-->
-        <!--android:orientation="vertical"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="match_parent">-->
-
-        <!--<include layout="@layout/toolbar"/>-->
-
-        <!--&lt;!&ndash; toolbar drop shadow&ndash;&gt;-->
-        <!--<View-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="4dp"-->
-            <!--android:background="@drawable/toolbar_shadow"/>-->
-
-
-        <!--<LinearLayout-->
-            <!--android:orientation="horizontal"-->
-            <!--android:baselineAligned="false"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="match_parent">-->
-
-            <!--<FrameLayout-->
-                <!--android:id="@+id/list_fragment_container"-->
-                <!--android:layout_width="0dp"-->
-                <!--android:layout_weight="1"-->
-                <!--android:layout_height="match_parent"/>-->
-
-            <!--<FrameLayout-->
-                <!--android:id="@+id/detail_fragment_container"-->
-                <!--android:layout_width="0dp"-->
-                <!--android:layout_weight="1"-->
-                <!--android:layout_height="match_parent"/>-->
-
-        <!--</LinearLayout>-->
-
-    <!--</LinearLayout>-->
-
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

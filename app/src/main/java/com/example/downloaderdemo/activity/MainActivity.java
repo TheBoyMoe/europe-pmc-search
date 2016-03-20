@@ -2,6 +2,7 @@ package com.example.downloaderdemo.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -24,11 +25,14 @@ public class MainActivity extends AppCompatActivity {
     private boolean mDualPane;
     private ModelFragment mModelFragment;
     private ArticleListFragment mArticleListFragment;
+    private CoordinatorLayout mCoordinatorLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinator_layout);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -45,8 +49,11 @@ public class MainActivity extends AppCompatActivity {
         mArticleListFragment =
                 (ArticleListFragment) getSupportFragmentManager().findFragmentById(R.id.article_list_fragment);
 
-        if(mArticleListFragment != null && mModelFragment != null) {
-            mArticleListFragment.setModelDataSet(mModelFragment.getModel());
+        // if both fragments exist, bind a copy of the datacache to the list adapter & update the display
+        if(savedInstanceState != null) {
+            if(mArticleListFragment != null && mModelFragment != null) {
+                mArticleListFragment.setModelDataSet(mModelFragment.getModel());
+            }
         }
 
         // determine if there is a frame in which to embed the detail fragment, eg on tablet
@@ -87,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    // notify the list fragment when the data model has been updated
+    // update the list fragments adapter when ever the data model is updated
     @Subscribe
     public void hasDataModelBeenUpdated(DataModelUpdateEvent event) {
         if(event.isDataModelUpToDate()) {

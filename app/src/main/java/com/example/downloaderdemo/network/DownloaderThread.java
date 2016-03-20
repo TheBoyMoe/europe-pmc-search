@@ -3,7 +3,7 @@ package com.example.downloaderdemo.network;
 import android.net.Uri;
 
 import com.example.downloaderdemo.EuroPMCApplication;
-import com.example.downloaderdemo.event.ResultQueryEvent;
+import com.example.downloaderdemo.event.QueryCompletionEvent;
 import com.example.downloaderdemo.model.ResultQuery;
 import com.facebook.stetho.okhttp.StethoInterceptor;
 import com.google.gson.Gson;
@@ -77,7 +77,7 @@ public class DownloaderThread extends Thread{
 
                     // use gson to parse the json and post the result to the bus
                     ResultQuery resultQuery = new Gson().fromJson(reader, ResultQuery.class);
-                    EuroPMCApplication.postToBus(new ResultQueryEvent(resultQuery)); // post results
+                    EuroPMCApplication.postToBus(new QueryCompletionEvent(resultQuery)); // post results
 
                     reader.close();
 

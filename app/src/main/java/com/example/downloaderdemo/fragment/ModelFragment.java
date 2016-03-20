@@ -14,7 +14,7 @@ import com.example.downloaderdemo.EuroPMCApplication;
 import com.example.downloaderdemo.R;
 import com.example.downloaderdemo.event.DataModelUpdateEvent;
 import com.example.downloaderdemo.event.QueryEvent;
-import com.example.downloaderdemo.event.ResultQueryEvent;
+import com.example.downloaderdemo.event.QueryCompletionEvent;
 import com.example.downloaderdemo.model.Article;
 import com.example.downloaderdemo.model.Journal;
 import com.example.downloaderdemo.model.JournalInfo;
@@ -111,9 +111,10 @@ public class ModelFragment extends BaseFragment{
         QueryPreferences.setSavedPrefValue(getActivity(), QueryPreferences.QUERY_STRING, mQuery);
     }
 
+
     // get the results of the search query
     @Subscribe
-    public void getResultOfQueryEvent(ResultQueryEvent event)  {
+    public void getResultOfQueryEvent(QueryCompletionEvent event)  {
 
         List<Article> resultList = event.getResultQuery().getResultList().getResult();
         if(resultList.size() > 0) {
@@ -150,8 +151,12 @@ public class ModelFragment extends BaseFragment{
 
     // retrieve the datacache
     public ArrayList<Article> getModel() {
-        Timber.i("getModel() called, size: %d", mArticles.size());
         return new ArrayList<>(mArticles);
+    }
+
+
+    public int getSize() {
+        return mArticles.size();
     }
 
 
