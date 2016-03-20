@@ -4,7 +4,9 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.TextView;
 
+import com.example.downloaderdemo.EuroPMCApplication;
 import com.example.downloaderdemo.R;
+import com.example.downloaderdemo.event.OnListItemClickEvent;
 import com.example.downloaderdemo.model.Article;
 
 public class ListItemViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
@@ -16,6 +18,7 @@ public class ListItemViewHolder extends RecyclerView.ViewHolder implements View.
     private TextView mJournalIssue;
     private TextView mJournalVolume;
     private TextView mYearOfPublication;
+    private int mPosition;
 
     public ListItemViewHolder(View view) {
         super(view);
@@ -31,7 +34,8 @@ public class ListItemViewHolder extends RecyclerView.ViewHolder implements View.
     }
 
 
-    public void bindArticleItem(Article article) {
+    public void bindArticleItem(Article article, int position) {
+        mPosition = position;
 
         mArticleTitle.setText(article.getTitle());
         mArticleAuthors.setText(article.getAuthorString());
@@ -48,6 +52,7 @@ public class ListItemViewHolder extends RecyclerView.ViewHolder implements View.
 
     @Override
     public void onClick(View v) {
-        // TODO post event
+        // post event
+        EuroPMCApplication.postToBus(new OnListItemClickEvent(mPosition));
     }
 }

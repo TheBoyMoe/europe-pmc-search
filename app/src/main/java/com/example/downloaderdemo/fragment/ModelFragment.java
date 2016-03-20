@@ -160,7 +160,7 @@ public class ModelFragment extends BaseFragment{
     }
 
 
-    public Article getJournal(int position) {
+    public Article getArticle(int position) {
         return mArticles.get(position);
     }
 

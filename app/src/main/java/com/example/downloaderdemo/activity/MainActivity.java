@@ -78,7 +78,9 @@ public class MainActivity extends AppCompatActivity {
     // handle list item clicks
     @Subscribe
     public void onListItemClickEvent(OnListItemClickEvent event) {
-        Article article = event.getArticle();
+
+        Article article = mModelFragment.getArticle(event.getPosition());
+
         if(article != null) {
             // on tablets
             if(mDualPane) {

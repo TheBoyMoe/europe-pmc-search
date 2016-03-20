@@ -1,16 +1,14 @@
 package com.example.downloaderdemo.event;
 
-import com.example.downloaderdemo.model.Article;
-
 public class OnListItemClickEvent extends BaseEvent{
 
-    private Article mArticle;
+    private int mPosition;
 
-    public OnListItemClickEvent(Article article) {
-        mArticle = article;
+    public OnListItemClickEvent(int position) {
+        mPosition = position;
     }
 
-    public Article getArticle() {
-        return mArticle;
+    public int getPosition() {
+        return mPosition;
     }
 }

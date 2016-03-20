@@ -30,7 +30,7 @@ public class ListItemAdapter extends RecyclerView.Adapter<ListItemViewHolder>{
 
     @Override
     public void onBindViewHolder(ListItemViewHolder holder, int position) {
-        holder.bindArticleItem(mList.get(position));
+        holder.bindArticleItem(mList.get(position), position);
     }
 
     @Override
