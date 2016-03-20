@@ -3,7 +3,6 @@ package com.example.downloaderdemo.fragment;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -14,28 +13,18 @@ import android.view.ViewGroup;
 import com.example.downloaderdemo.EuroPMCApplication;
 import com.example.downloaderdemo.R;
 import com.example.downloaderdemo.event.DataModelUpdateEvent;
-import com.example.downloaderdemo.event.IsThreadRunningEvent;
 import com.example.downloaderdemo.event.QueryEvent;
 import com.example.downloaderdemo.event.ResultQueryEvent;
 import com.example.downloaderdemo.model.Article;
 import com.example.downloaderdemo.model.Journal;
 import com.example.downloaderdemo.model.JournalInfo;
 import com.example.downloaderdemo.model.KeywordList;
-import com.example.downloaderdemo.model.ResultQuery;
 import com.example.downloaderdemo.network.DownloaderThread;
 import com.example.downloaderdemo.util.DatabaseHelper;
 import com.example.downloaderdemo.util.QueryPreferences;
 import com.example.downloaderdemo.util.Utils;
-import com.google.gson.Gson;
 import com.squareup.otto.Subscribe;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -48,8 +37,8 @@ import timber.log.Timber;
 public class ModelFragment extends BaseFragment{
 
     // instance variables
-    private boolean mIsStarted = false;
-    private List<Article> mArticles = new ArrayList<>();
+    private boolean mIsRunning = false;
+    private List<Article> mArticles = new ArrayList<>(); // temp cache of saved results
     private String mQuery;
     private int mCurrentPage;
     private AsyncTask mTask;
@@ -95,6 +84,8 @@ public class ModelFragment extends BaseFragment{
 
     @Subscribe
     public void getSearchQuery(QueryEvent event) {
+
+        // retrieve the posted query
         String searchQuery = event.getQuery();
 
         // get the last saved search query & page count
@@ -105,38 +96,35 @@ public class ModelFragment extends BaseFragment{
 
         if(mQuery == null || !mQuery.equals(searchQuery)) {
             // if it's the first time thru or a new query
+            // delete the currently saved results
             mTask = new DeleteTask().execute();
             mQuery = searchQuery;
             mCurrentPage = 1;
         }
 
-        // execute the background thread
-        if(!mIsStarted) {
-            mIsStarted = true;
+        // execute the search on a background thread, if it's not already running
+        if(!mIsRunning) {
+            mIsRunning = true;
             new DownloaderThread(mQuery, String.valueOf(mCurrentPage)).start();
             Timber.i("Executing search for: %s, current page: %s", mQuery, mCurrentPage);
         }
         QueryPreferences.setSavedPrefValue(getActivity(), QueryPreferences.QUERY_STRING, mQuery);
     }
 
-
-    @Subscribe
-    public void getIsTreadRunningEvent(IsThreadRunningEvent event) {
-        mIsStarted = event.isThreadRunning();
-    }
-
+    // get the results of the search query
     @Subscribe
     public void getResultOfQueryEvent(ResultQueryEvent event)  {
 
         List<Article> resultList = event.getResultQuery().getResultList().getResult();
         if(resultList.size() > 0) {
 
-            // adding the results to the dbase - automatically executes a query which updates the UI
+            // add the results to the dbase - automatically executes a query which updates the UI
             Article[] list = resultList.toArray(new Article[resultList.size()]);
             mTask = new InsertTask().execute(list);
 
-            // update the page number
+            // update the page number & thread status
             ++mCurrentPage;
+            mIsRunning = false;
 
         } else if(resultList.size() == 0 && mQuery != null) {
             Utils.showSnackbar(getActivity().findViewById(R.id.coordinator_layout), "No results found");
@@ -160,6 +148,7 @@ public class ModelFragment extends BaseFragment{
     }
 
 
+    // retrieve the datacache
     public ArrayList<Article> getModel() {
         Timber.i("getModel() called, size: %d", mArticles.size());
         return new ArrayList<>(mArticles);
@@ -171,12 +160,13 @@ public class ModelFragment extends BaseFragment{
     }
 
 
+    // CRUD operations performed by an AsyncTask
     private abstract class BaseTask<T> extends AsyncTask<T, Void, Cursor> {
 
         @Override
         protected void onPostExecute(Cursor cursor) {
 
-            // convert the cursor to an arraylist of Article Pojos update the datacache
+            // convert the cursor to an arraylist of Article Pojos & update the datacache
             Article article;
             JournalInfo journalInfo;
             Journal journal;
@@ -223,7 +213,7 @@ public class ModelFragment extends BaseFragment{
                 mArticles.add(article);
             }
 
-            Timber.i("Cache contains %d records", mArticles.size());
+            Timber.i("Datacache contains %d records", mArticles.size());
 
             cursor.close();
 
@@ -246,7 +236,7 @@ public class ModelFragment extends BaseFragment{
                             sortOrder);
             result.getCount(); // ensure the query is executed
             Timber.i("Querying the database, returned %d rows", result.getCount());
-            return result;
+            return result; // cursor processed by onPostExecute()
         }
 
     }
@@ -317,7 +307,7 @@ public class ModelFragment extends BaseFragment{
 
                 db.insert(DatabaseHelper.TABLE_NAME, DatabaseHelper.ARTICLE_TITLE, values);
             }
-            return doQuery(); // ensure view is refreshed
+            return doQuery(); // returns a cursor, passed to onPostExecute()
         }
     }
 
@@ -334,6 +324,7 @@ public class ModelFragment extends BaseFragment{
     }
 
 
+    // helper methods
     private String validateStringValue(String value) {
         if(value != null && !value.equals("")){
             return value;

@@ -1,8 +1,8 @@
 package com.example.downloaderdemo.activity;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 
@@ -10,9 +10,8 @@ import com.example.downloaderdemo.EuroPMCApplication;
 import com.example.downloaderdemo.R;
 import com.example.downloaderdemo.event.DataModelUpdateEvent;
 import com.example.downloaderdemo.event.OnListItemClickEvent;
-import com.example.downloaderdemo.event.RefreshAdapterEvent;
-import com.example.downloaderdemo.fragment.ArticleListFragment;
 import com.example.downloaderdemo.fragment.ArticleDetailFragment;
+import com.example.downloaderdemo.fragment.ArticleListFragment;
 import com.example.downloaderdemo.fragment.ModelFragment;
 import com.example.downloaderdemo.model.Article;
 import com.squareup.otto.Subscribe;
@@ -34,27 +33,17 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        mModelFragment =
-                (ModelFragment) getFragmentManager().findFragmentByTag(MODEL_FRAGMENT_TAG);
-
+        mModelFragment = (ModelFragment) getSupportFragmentManager().findFragmentByTag(MODEL_FRAGMENT_TAG);
         if(mModelFragment == null) {
-
             mModelFragment = ModelFragment.newInstance();
-            getFragmentManager().beginTransaction()
+            getSupportFragmentManager().beginTransaction()
                     .add(mModelFragment, MODEL_FRAGMENT_TAG)
                     .commit();
         }
 
+        // cache a reference to the list fragment inflated via xml layout
         mArticleListFragment =
-                (ArticleListFragment) getFragmentManager().findFragmentById(R.id.list_fragment_container);
-
-        if(mArticleListFragment == null) {
-
-            mArticleListFragment = ArticleListFragment.newInstance();
-            getFragmentManager().beginTransaction()
-                    .add(R.id.list_fragment_container, mArticleListFragment)
-                    .commit();
-        }
+                (ArticleListFragment) getSupportFragmentManager().findFragmentById(R.id.article_list_fragment);
 
         if(mArticleListFragment != null && mModelFragment != null) {
             mArticleListFragment.setModelDataSet(mModelFragment.getModel());
@@ -63,9 +52,7 @@ public class MainActivity extends AppCompatActivity {
         // determine if there is a frame in which to embed the detail fragment, eg on tablet
         View detailPane = findViewById(R.id.detail_fragment_container);
         mDualPane = detailPane != null && detailPane.getVisibility() == View.VISIBLE;
-
     }
-
 
     @Override
     protected void onResume() {
@@ -87,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
             // on tablets
             if(mDualPane) {
                 // swap the current fragment
-                getFragmentManager().beginTransaction()
+                getSupportFragmentManager().beginTransaction()
                         .replace(R.id.detail_fragment_container, ArticleDetailFragment.newInstance(article))
                         .commit();
             } else {
@@ -108,9 +95,6 @@ public class MainActivity extends AppCompatActivity {
                 Timber.i("Data model updated!");
                 // pass a copy of the List of article objects to the ArticleListFragment
                 mArticleListFragment.setModelDataSet(mModelFragment.getModel());
-
-                // notify the list fragment to refresh the view
-                EuroPMCApplication.postToBus(new RefreshAdapterEvent(true));
             }
         }
     }

@@ -3,8 +3,6 @@ package com.example.downloaderdemo.ui;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 
-import com.example.downloaderdemo.fragment.ArticleListFragment.JournalViewHolder;
-
 /**
  * Reference
  * The Busy Coder's Guide to Android Development (https://commonsware.com/Android) p1260-64
@@ -24,13 +22,13 @@ public abstract class ChoiceCapableAdapter<T extends RecyclerView.ViewHolder> ex
     public void onChecked(int position, boolean isChecked) {
         if(mChoiceMode.isSingleChoice()) {
             int checked = mChoiceMode.getCheckedPosition();
-            if(checked >= 0) {
-                JournalViewHolder row =
-                        (JournalViewHolder) mRecyclerView.findViewHolderForAdapterPosition(checked);
-                if(row != null) {
-                    row.setChecked(false);
-                }
-            }
+//            if(checked >= 0) {
+//                JournalViewHolder row =
+//                        (JournalViewHolder) mRecyclerView.findViewHolderForAdapterPosition(checked);
+//                if(row != null) {
+//                    row.setChecked(false);
+//                }
+//            }
         }
         mChoiceMode.setChecked(position, isChecked);
     }

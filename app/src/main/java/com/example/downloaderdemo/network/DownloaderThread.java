@@ -3,18 +3,17 @@ package com.example.downloaderdemo.network;
 import android.net.Uri;
 
 import com.example.downloaderdemo.EuroPMCApplication;
-import com.example.downloaderdemo.event.IsThreadRunningEvent;
 import com.example.downloaderdemo.event.ResultQueryEvent;
 import com.example.downloaderdemo.model.ResultQuery;
+import com.facebook.stetho.okhttp.StethoInterceptor;
 import com.google.gson.Gson;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.io.Reader;
 
 import timber.log.Timber;
 
@@ -35,6 +34,8 @@ public class DownloaderThread extends Thread{
     @Override
     public void run() {
         if(!isInterrupted()) {
+
+            Timber.i("Executing download thread");
 
             // uri parameters
             String format = "json"; // json, xml, dc
@@ -61,31 +62,31 @@ public class DownloaderThread extends Thread{
                     .appendQueryParameter(FORMAT_PARAM, format)
                     .build();
 
-            HttpURLConnection con = null;
+            Timber.i("Url: %s", uri.toString());
 
             try {
-                URL url = new URL(uri.toString());
-                Timber.i("Url: %s", url);
-                con = (HttpURLConnection) url.openConnection();
-                InputStream is = con.getInputStream();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(is));
 
-                // use gson to parse the json and post the result to the bus
-                ResultQuery resultQuery = new Gson().fromJson(reader, ResultQuery.class);
-                EuroPMCApplication.postToBus(new ResultQueryEvent(resultQuery)); // post results
+                OkHttpClient client = new OkHttpClient();
+                client.networkInterceptors().add(new StethoInterceptor());
+                Request request = new Request.Builder().url(uri.toString()).build();
+                Response response = client.newCall(request).execute();
 
-                reader.close();
+                if(response.isSuccessful()) {
+                    Reader in = response.body().charStream();
+                    BufferedReader reader = new BufferedReader(in);
 
-                // Let who ever started the thread know that it has finished
-                EuroPMCApplication.postToBus(new IsThreadRunningEvent(false));
+                    // use gson to parse the json and post the result to the bus
+                    ResultQuery resultQuery = new Gson().fromJson(reader, ResultQuery.class);
+                    EuroPMCApplication.postToBus(new ResultQueryEvent(resultQuery)); // post results
 
-            } catch (MalformedURLException e) {
-                Timber.e("Failure building the url: %s", e.getMessage());
+                    reader.close();
+
+                } else {
+                    Timber.e("Http response: %s", response.toString());
+                }
+
             } catch (IOException e) {
-                Timber.e("Failure to open connection: %s", e.getMessage());
-            } finally {
-                if(con != null)
-                    con.disconnect();
+                Timber.e("exception thrown downloading data: %s", e.getMessage());
             }
 
         }

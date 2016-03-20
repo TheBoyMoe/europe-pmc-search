@@ -17,9 +17,9 @@ public class DetailActivity extends AppCompatActivity{
 
         Article article = getIntent().getParcelableExtra(ArticleDetailFragment.ARTICLE_ITEM);
 
-        ArticleDetailFragment articleDetailFragment = (ArticleDetailFragment) getFragmentManager().findFragmentById(R.id.detail_fragment_container);
+        ArticleDetailFragment articleDetailFragment = (ArticleDetailFragment) getSupportFragmentManager().findFragmentById(R.id.detail_fragment_container);
         if(articleDetailFragment == null) {
-            getFragmentManager().beginTransaction()
+            getSupportFragmentManager().beginTransaction()
                     .add(R.id.detail_fragment_container, ArticleDetailFragment.newInstance(article))
                     .commit();
         }

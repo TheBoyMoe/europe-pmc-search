@@ -3,15 +3,12 @@ package com.example.downloaderdemo.fragment;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.provider.SearchRecentSuggestions;
 import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
@@ -24,21 +21,16 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.downloaderdemo.R;
-import com.example.downloaderdemo.event.OnListItemClickEvent;
+import com.example.downloaderdemo.adapter.CustomItemDecoration;
+import com.example.downloaderdemo.adapter.ListItemAdapter;
 import com.example.downloaderdemo.event.QueryEvent;
-import com.example.downloaderdemo.event.RefreshAdapterEvent;
 import com.example.downloaderdemo.model.Article;
 import com.example.downloaderdemo.network.DownloaderThread;
-import com.example.downloaderdemo.ui.ChoiceCapableAdapter;
-import com.example.downloaderdemo.ui.HorizontalDivider;
-import com.example.downloaderdemo.ui.SingleChoiceMode;
 import com.example.downloaderdemo.util.QueryPreferences;
 import com.example.downloaderdemo.util.QuerySuggestionProvider;
 import com.example.downloaderdemo.util.Utils;
-import com.squareup.otto.Subscribe;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import timber.log.Timber;
 
@@ -75,7 +67,7 @@ public class ArticleListFragment extends BaseFragment{
     private static SearchRecentSuggestions sRecentSuggestions;
     private SearchView mSearchView;
     private MenuItem mSearchMenuItem;
-    private ChoiceCapableAdapter<?> mAdapter;
+    private ListItemAdapter mAdapter;
     private RecyclerView mRecyclerView;
     private TextView mEmptyView;
     private LinearLayoutManager mLayoutManager;
@@ -94,21 +86,21 @@ public class ArticleListFragment extends BaseFragment{
         return new ArticleListFragment();
     }
 
+
+    public void setModelDataSet(ArrayList<Article> list) {
+        mAdapter.clearAll();
+        mAdapter.addAll(list);
+        mAdapter.notifyDataSetChanged();
+        refreshDisplay();
+    }
+
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
     }
 
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
-        if(savedInstanceState != null) {
-            mAdapter.onRestoreInstanceState(savedInstanceState);
-        }
-    }
 
     @Nullable
     @Override
@@ -120,11 +112,12 @@ public class ArticleListFragment extends BaseFragment{
 
         mLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(mLayoutManager);
-        Drawable itemDivider = ContextCompat.getDrawable(getActivity(), R.drawable.item_divider);
-        mRecyclerView.addItemDecoration(new HorizontalDivider(itemDivider));
-
-        mAdapter = new JournalAdapter(mRecyclerView);
-        mRecyclerView.setAdapter(mAdapter);
+        mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.addItemDecoration(new CustomItemDecoration(getResources().getDimensionPixelSize(R.dimen.dimen_list_item_spacer)));
+        mAdapter = new ListItemAdapter(getActivity(), mArticleItems);
+        Timber.i("Create adapter: %s", mAdapter);
+        if(isAdded())
+            mRecyclerView.setAdapter(mAdapter);
 
         // retrieve saved query, if there is one
         mQuery = QueryPreferences.getSavedPrefValue(getActivity(), QueryPreferences.QUERY_STRING);
@@ -132,21 +125,18 @@ public class ArticleListFragment extends BaseFragment{
         if(savedInstanceState == null) {
             mFirstTimeIn = true;
             mLoading = false;
-
         } else {
             // re-set fragment state
             mLoading = savedInstanceState.getBoolean(SAVED_LOADING);
             mQuery = savedInstanceState.getString(SAVED_QUERY);
         }
 
-        // refresh the UI with any results returned from the dbase
-        updateUI();
-
         // implement endless scrolling
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
+
                 mVisibleItemCount = recyclerView.getChildCount();
                 mTotalItemCount = mLayoutManager.getItemCount();
                 mFirstVisibleItem = mLayoutManager.findFirstVisibleItemPosition();
@@ -161,7 +151,7 @@ public class ArticleListFragment extends BaseFragment{
                         <= (mFirstVisibleItem  + mVisibleThreshold)) {
                     // end of page has been reached, download more items
                     mLoading = true;
-                    getSearchResults();
+                    getSearchResults(); // download more results
                 }
             }
         });
@@ -170,21 +160,10 @@ public class ArticleListFragment extends BaseFragment{
     }
 
 
-    private void getSearchResults() {
-        if(Utils.isClientConnected(getActivity())) {
-            if(mQuery != null) {
-                postToAppBus(new QueryEvent(mQuery));
-                Timber.i("Posting query: %s to bus, ARTICLE SIZE: %d", mQuery, mArticleItems.size());
-                if(mArticleItems.size() == 0) {
-                    mEmptyView.setVisibility(View.GONE); // ?? needs to be visible
-                    mRecyclerView.setVisibility(View.GONE);
-                }
-            } else {
-                Utils.showSnackbar(mView, "No more results, enter a query");
-            }
-        } else {
-            Utils.showSnackbar(getActivity().findViewById(R.id.coordinator_layout), "No network connection");
-        }
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        updateUI();
     }
 
     @Override
@@ -192,7 +171,6 @@ public class ArticleListFragment extends BaseFragment{
         super.onSaveInstanceState(outState);
         outState.putBoolean(SAVED_LOADING, mLoading);
         outState.putString(SAVED_QUERY, mQuery);
-        mAdapter.onSaveInstanceState(outState);
     }
 
 
@@ -254,6 +232,7 @@ public class ArticleListFragment extends BaseFragment{
             // clear user's search history & shared prefs
             if(sRecentSuggestions != null) {
                 ConfirmationDialogFragment dialog = new ConfirmationDialogFragment();
+                //dialog.show(getFragmentManager(), "Clear history");
                 dialog.show(getFragmentManager(), "Clear history");
             } else {
                 Utils.showSnackbar(mView, "History clear");
@@ -264,33 +243,40 @@ public class ArticleListFragment extends BaseFragment{
     }
 
 
-    public void setModelDataSet(ArrayList<Article> list) {
-        Timber.i("setDataModelSet() called, size: %d", list.size());
-        mArticleItems = list;
+    private void getSearchResults() {
+        if(Utils.isClientConnected(getActivity())) {
+            if(mQuery != null) {
+                // post a query, which will be executed by the thread
+                postToAppBus(new QueryEvent(mQuery));
+                if(mArticleItems.size() == 0) {
+                    mEmptyView.setVisibility(View.GONE);
+                    mRecyclerView.setVisibility(View.GONE);
+                }
+            } else {
+                Utils.showSnackbar(mView, "No more results, enter a query");
+            }
+        } else {
+            Utils.showSnackbar(getActivity().findViewById(R.id.coordinator_layout), "No network connection");
+        }
     }
 
 
-    @Subscribe
-    public void hasAdapterBeenRefreshed(RefreshAdapterEvent event) {
-        if(event.isRefreshAdapter()) {
-            updateUI();
-            if(mFirstTimeIn) {
-                mFirstTimeIn = false;
-                if(mArticleItems.size() > 0)
-                    Utils.showSnackbar(mView, "Results returned from database");
-                else
-                    Utils.showSnackbar(mView, "No results saved to the database");
-            } else
-            if(mArticleItems.size() > Integer.valueOf(DownloaderThread.PAGE_SIZE)) {
-                Utils.showSnackbar(getActivity().findViewById(R.id.coordinator_layout), "Downloading more items");
-            }
+    private void refreshDisplay() {
+        updateUI();
+        if(mFirstTimeIn) {
+            mFirstTimeIn = false;
+            if(mArticleItems.size() > 0)
+                Utils.showSnackbar(mView, "Results returned from database");
+            else
+                Utils.showSnackbar(mView, "No results saved to the database");
+        } else
+        if(mArticleItems.size() > Integer.valueOf(DownloaderThread.PAGE_SIZE)) {
+            Utils.showSnackbar(getActivity().findViewById(R.id.coordinator_layout), "Downloading more items, " + mArticleItems.size() + " so far");
         }
     }
 
     private void updateUI() {
-
         if(mArticleItems.size() > 0) {
-            mAdapter.notifyDataSetChanged();
             mRecyclerView.setVisibility(View.VISIBLE);
             mEmptyView.setVisibility(View.GONE);
             Timber.i("Refreshing UI");
@@ -303,121 +289,8 @@ public class ArticleListFragment extends BaseFragment{
     }
 
 
-    private class JournalAdapter extends ChoiceCapableAdapter<JournalViewHolder> {
-
-
-        public JournalAdapter(RecyclerView recyclerView) {
-            super(recyclerView, new SingleChoiceMode());
-        }
-
-
-        @Override
-        public JournalViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-
-            // create the viewholder
-            return (new JournalViewHolder(this, getActivity().getLayoutInflater()
-                            .inflate(R.layout.list_item, parent, false)));
-        }
-
-        @Override
-        public void onBindViewHolder(JournalViewHolder holder, int position) {
-            // populate the viewholder
-            holder.bindJournal(mArticleItems.get(position));
-        }
-
-        @Override
-        public int getItemCount() {
-            return mArticleItems.size();
-        }
-
-        public void clearAll() {
-            mArticleItems.clear();
-            notifyDataSetChanged();
-        }
-
-        public void addAll(List<Article> items) {
-            mArticleItems.addAll(items);
-            notifyDataSetChanged();
-        }
-
-    }
-
-
-    public class JournalViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
-
-        private Article mArticle;
-        private ChoiceCapableAdapter mAdapter;
-        private View mView;
-
-        TextView articleTitle = null;
-        TextView journalTitle = null;
-        TextView articleAuthors = null;
-        TextView pageInformation = null;
-        TextView journalIssue = null;
-        TextView journalVolume = null;
-        TextView yearOfPublication = null;
-        //TextView cited = null;
-
-        public JournalViewHolder(ChoiceCapableAdapter adapter, View view) {
-            super(view);
-            mAdapter = adapter;
-            mView = view;
-
-            articleTitle = (TextView) mView.findViewById(R.id.article_title);
-            journalTitle = (TextView) mView.findViewById(R.id.journal_title);
-            articleAuthors = (TextView) mView.findViewById(R.id.article_authors);
-            pageInformation = (TextView) mView.findViewById(R.id.page_information);
-            journalIssue = (TextView) mView.findViewById(R.id.journal_issue);
-            journalVolume = (TextView) mView.findViewById(R.id.journal_volume);
-            yearOfPublication = (TextView) mView.findViewById(R.id.publication_year);
-            //cited = (TextView) view.findViewById(R.id.cited_times);
-
-            mView.setOnClickListener(this);
-        }
-
-
-        public void bindJournal(Article article) {
-
-            // article object read back from the database
-            mArticle = article;
-
-            articleTitle.setText(mArticle.getTitle());
-            articleAuthors.setText(mArticle.getAuthorString());
-            pageInformation.setText(mArticle.getPageInfo());
-
-            if(mArticle.getJournalInfo().getYearOfPublication() == 0) {
-                yearOfPublication.setText(getString(R.string.na_label));
-            } else {
-                yearOfPublication.setText(String.valueOf(mArticle.getJournalInfo().getYearOfPublication()));
-            }
-
-            journalVolume.setText(mArticle.getJournalInfo().getVolume());
-            journalIssue.setText(mArticle.getJournalInfo().getIssue());
-            journalTitle.setText(mArticle.getJournalInfo().getJournal().getTitle());
-
-            setChecked(mAdapter.isChecked(getAdapterPosition()));
-        }
-
-        public void setChecked(boolean isChecked) {
-            mView.setActivated(isChecked);
-        }
-
-        @Override
-        public void onClick(View view) {
-            // post on click event to the bus
-            postToAppBus(new OnListItemClickEvent(mArticle));
-
-            // handle checked status
-            boolean isCheckedNow = mAdapter.isChecked(getAdapterPosition());
-            mAdapter.onChecked(getAdapterPosition(), !isCheckedNow);
-            mView.setActivated(!isCheckedNow);
-        }
-
-
-    }
-
-
-    public static class ConfirmationDialogFragment extends DialogFragment {
+    // use DialogFragment from the support lib since the fragment is also from the support library
+    public static class ConfirmationDialogFragment extends android.support.v4.app.DialogFragment {
 
         public ConfirmationDialogFragment() {}
 

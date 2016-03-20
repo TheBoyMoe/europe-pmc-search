@@ -1,7 +1,7 @@
 package com.example.downloaderdemo.fragment;
 
-import android.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 
 import com.example.downloaderdemo.EuroPMCApplication;
 import com.example.downloaderdemo.event.BaseEvent;
@@ -11,7 +11,7 @@ import com.squareup.otto.Bus;
  * Other fragments that need to either post to or subscribe to the event
  * buss can inherit from this class
  */
-public class BaseFragment extends Fragment{
+public class BaseFragment extends Fragment {
 
     public BaseFragment() {}
 

@@ -12,4 +12,6 @@
     <dimen name="dimen_xxlarge">64dp</dimen>
     <dimen name="dimen_divider">1dp</dimen>
 
+    <dimen name="dimen_list_item_spacer">12px</dimen>
+
 </resources>
