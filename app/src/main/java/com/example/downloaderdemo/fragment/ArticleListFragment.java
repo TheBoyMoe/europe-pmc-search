@@ -87,7 +87,6 @@ public class ArticleListFragment extends BaseFragment{
 
 
     public void setModelDataSet(ArrayList<Article> list) {
-        Timber.e("setModelData called");
         mAdapter.clearAll();
         mAdapter.addAll(list);
         mAdapter.notifyDataSetChanged();
@@ -106,7 +105,6 @@ public class ArticleListFragment extends BaseFragment{
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        Timber.e("onCreateView Called");
         mView = inflater.inflate(R.layout.recycler_view, container, false);
         mEmptyView = (TextView) mView.findViewById(R.id.empty_view);
         mRecyclerView = (RecyclerView) mView.findViewById(R.id.recycler_view);
@@ -255,14 +253,12 @@ public class ArticleListFragment extends BaseFragment{
 
 
     private void updateUI() {
-        Timber.e("UpdateUI called, list size: %d, firstTimeIn: %s", mAdapter.getItemCount(), mFirstTimeIn);
 
         if(mAdapter.getItemCount() > 0) {
             mRecyclerView.setVisibility(View.VISIBLE);
             mEmptyView.setVisibility(View.GONE);
             if(mFirstTimeIn) {
-                Timber.i("Results returned from database");
-                Utils.showSnackbar(mView, "Results returned from database");
+                Utils.showSnackbar(mView, String.format("%d records returned from the database", mAdapter.getItemCount()));
             }
         }
         else {
@@ -270,7 +266,6 @@ public class ArticleListFragment extends BaseFragment{
             mEmptyView.setVisibility(View.VISIBLE);
             mRecyclerView.setVisibility(View.GONE);
             if(mFirstTimeIn) {
-                Timber.i("Empty data set, nothing to show!");
                 Utils.showSnackbar(mView, "No results available in the database");
             }
         }

@@ -11,10 +11,12 @@ import com.example.downloaderdemo.EuroPMCApplication;
 import com.example.downloaderdemo.R;
 import com.example.downloaderdemo.event.DataModelUpdateEvent;
 import com.example.downloaderdemo.event.OnListItemClickEvent;
+import com.example.downloaderdemo.event.QueryCompletionEvent;
 import com.example.downloaderdemo.fragment.ArticleDetailFragment;
 import com.example.downloaderdemo.fragment.ArticleListFragment;
 import com.example.downloaderdemo.fragment.ModelFragment;
 import com.example.downloaderdemo.model.Article;
+import com.example.downloaderdemo.util.Utils;
 import com.squareup.otto.Subscribe;
 
 import timber.log.Timber;
@@ -107,4 +109,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    @Subscribe
+    public void checkThreadCompletionEvent(QueryCompletionEvent event) {
+        if(event.getResultQuery() != null && mModelFragment.getSize() > 20) {
+            Utils.showSnackbar(mCoordinatorLayout, String.format("Downloading more articles, %d so far", mModelFragment.getSize() + 20));
+        }
+    }
 }
