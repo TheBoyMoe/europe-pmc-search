@@ -61,7 +61,9 @@ public class MainActivity extends AppCompatActivity {
         // determine if there is a frame in which to embed the detail fragment, eg on tablet
         View detailPane = findViewById(R.id.detail_fragment_container);
         mDualPane = detailPane != null && detailPane.getVisibility() == View.VISIBLE;
+
     }
+
 
     @Override
     protected void onResume() {
@@ -106,6 +108,16 @@ public class MainActivity extends AppCompatActivity {
                 Timber.i("Data model updated!");
                 // pass a copy of the List of article objects to the ArticleListFragment
                 mArticleListFragment.setModelDataSet(mModelFragment.getModel());
+
+                // highlight the first item (is there is data) and display it in the detail fragment
+                if(mDualPane && mModelFragment.getSize() > 0) {
+                    mArticleListFragment.isDualPane(true);
+                    Article article = mModelFragment.getArticle(0); // initial position
+
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.detail_fragment_container, ArticleDetailFragment.newInstance(article))
+                            .commit();
+                }
             }
         }
     }
@@ -113,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Subscribe
     public void checkThreadCompletionEvent(QueryCompletionEvent event) {
-        if(event.getResultQuery() != null && mModelFragment.getSize() > 20) {
+        if(event.getResultQuery() != null && mModelFragment.getSize() > 19) {
             Utils.showSnackbar(mCoordinatorLayout, String.format("Downloading more articles, %d so far", mModelFragment.getSize() + 20));
         }
     }

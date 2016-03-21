@@ -19,10 +19,12 @@ public class ListItemViewHolder extends RecyclerView.ViewHolder implements View.
     private TextView mJournalVolume;
     private TextView mYearOfPublication;
     private int mPosition;
+    private ItemChoiceManager mItemChoiceManager;
 
-    public ListItemViewHolder(View view) {
+    public ListItemViewHolder(View view, ItemChoiceManager choiceManager) {
         super(view);
         view.setOnClickListener(this);
+        mItemChoiceManager = choiceManager;
 
         mArticleTitle = (TextView) view.findViewById(R.id.article_title);
         mJournalTitle = (TextView) view.findViewById(R.id.journal_title);
@@ -54,5 +56,7 @@ public class ListItemViewHolder extends RecyclerView.ViewHolder implements View.
     public void onClick(View v) {
         // post event
         EuroPMCApplication.postToBus(new OnListItemClickEvent(mPosition));
+        // set the active state
+        mItemChoiceManager.onClick(this);
     }
 }

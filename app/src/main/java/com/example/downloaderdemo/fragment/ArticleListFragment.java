@@ -6,18 +6,21 @@ import android.app.Dialog;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.provider.SearchRecentSuggestions;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.TextView;
 
 import com.example.downloaderdemo.R;
@@ -49,11 +52,11 @@ import timber.log.Timber;
  * [4] http://stackoverflow.com/questions/26543131/how-to-implement-endless-list-with-recyclerview
  * [5] http://androhub.com/load-more-items-on-scroll-android/
  *
- * SingleChoiceMode
- * [6] The Busy Coder's Guide to Android Development (https://commonsware.com/Android) p1260
- *
  * SQLiteDatabase
- * [7] The Busy Coder's Guide to Android Development (https://commonsware.com/Android) p598-608
+ * [6] The Busy Coder's Guide to Android Development (https://commonsware.com/Android) p598-608
+ *
+ * SingleChoiceMode
+ * [7] Udacity Advanced Android Development
  *
  */
 
@@ -73,7 +76,9 @@ public class ArticleListFragment extends BaseFragment{
     private String mQuery;
     private boolean mFirstTimeIn = true;
     private View mView;
-
+    private int mChoiceMode;
+    private boolean mIsDualPane;
+    //private boolean mInitialView = true;
 
     // endless scrolling variables
     private boolean mLoading = true;
@@ -85,7 +90,6 @@ public class ArticleListFragment extends BaseFragment{
         return new ArticleListFragment();
     }
 
-
     public void setModelDataSet(ArrayList<Article> list) {
         mAdapter.clearAll();
         mAdapter.addAll(list);
@@ -93,6 +97,15 @@ public class ArticleListFragment extends BaseFragment{
         updateUI();
     }
 
+    // method only called if a fragment is inflated from xml
+    @Override
+    public void onInflate(Context context, AttributeSet attrs, Bundle savedInstanceState) {
+        super.onInflate(context, attrs, savedInstanceState);
+        TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.ListItemFragment, 0, 0);
+        mChoiceMode = typedArray.getInt(R.styleable.ListItemFragment_android_choiceMode, AbsListView.CHOICE_MODE_NONE);
+        boolean autoSelectView = typedArray.getBoolean(R.styleable.ListItemFragment_autoSelectView, false);
+        typedArray.recycle();
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -113,7 +126,7 @@ public class ArticleListFragment extends BaseFragment{
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.addItemDecoration(new CustomItemDecoration(getResources().getDimensionPixelSize(R.dimen.dimen_list_item_spacer)));
-        mAdapter = new ListItemAdapter(getActivity(), new ArrayList<Article>());
+        mAdapter = new ListItemAdapter(getActivity(), new ArrayList<Article>(), mChoiceMode);
 
         if(isAdded())
             mRecyclerView.setAdapter(mAdapter);
@@ -128,6 +141,7 @@ public class ArticleListFragment extends BaseFragment{
             mLoading = savedInstanceState.getBoolean(SAVED_LOADING);
             mQuery = savedInstanceState.getString(SAVED_QUERY);
             mFirstTimeIn = savedInstanceState.getBoolean(SAVED_FIRST_TIME_IN);
+            mAdapter.onRestoreInstanceState(savedInstanceState);
         }
 
         // implement endless scrolling
@@ -165,6 +179,7 @@ public class ArticleListFragment extends BaseFragment{
         outState.putBoolean(SAVED_LOADING, mLoading);
         outState.putString(SAVED_QUERY, mQuery);
         outState.putBoolean(SAVED_FIRST_TIME_IN, mFirstTimeIn);
+        mAdapter.onSaveInstanceState(outState);
     }
 
 
@@ -270,6 +285,15 @@ public class ArticleListFragment extends BaseFragment{
             }
         }
         mFirstTimeIn = false;
+    }
+
+
+    public void isDualPane(boolean value) {
+        mIsDualPane = value;
+        // set the initial view of the detail pane to be that of the first item in the list
+        if(mIsDualPane) {
+            mAdapter.setInitialView(0);
+        }
     }
 
 
