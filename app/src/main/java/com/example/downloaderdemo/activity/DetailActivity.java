@@ -15,6 +15,10 @@ public class DetailActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
+        if(getSupportActionBar() != null) {
+            getSupportActionBar().setTitle("");
+        }
+
         Article article = getIntent().getParcelableExtra(ArticleDetailFragment.ARTICLE_ITEM);
 
         ArticleDetailFragment articleDetailFragment = (ArticleDetailFragment) getSupportFragmentManager().findFragmentById(R.id.detail_fragment_container);
