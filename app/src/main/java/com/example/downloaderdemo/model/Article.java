@@ -3,8 +3,6 @@ package com.example.downloaderdemo.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.sql.RowId;
-
 public class Article implements Parcelable {
 
     private Integer rowid;
@@ -100,7 +98,7 @@ public class Article implements Parcelable {
 
     @Override
     public String toString() {
-        return String.valueOf(getRowid());
+        return String.format("%s", getTitle());
     }
 
 

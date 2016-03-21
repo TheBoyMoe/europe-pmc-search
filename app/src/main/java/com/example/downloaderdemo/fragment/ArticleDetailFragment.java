@@ -1,8 +1,14 @@
 package com.example.downloaderdemo.fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.widget.ShareActionProvider;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -10,12 +16,12 @@ import android.widget.TextView;
 import com.example.downloaderdemo.R;
 import com.example.downloaderdemo.model.Article;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ArticleDetailFragment extends BaseFragment{
 
     public static final String ARTICLE_ITEM = "journal";
+    private ShareActionProvider mShareActionProvider;
     private Article mArticle;
     private View mView;
     private TextView mArticleTitle;
@@ -44,6 +50,7 @@ public class ArticleDetailFragment extends BaseFragment{
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
         mArticle = getArguments().getParcelable(ARTICLE_ITEM);
     }
 
@@ -54,6 +61,29 @@ public class ArticleDetailFragment extends BaseFragment{
         cacheFragmentElements();
         populateFragmentElements();
         return mView;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_share, menu);
+
+        // retrieve the shareActionProvider menu item &  enable it
+        MenuItem menuItem = menu.findItem(R.id.action_share);
+        mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(menuItem);
+        if(mArticle != null)
+            mShareActionProvider.setShareIntent(createShareArticleIntent());
+    }
+
+    private Intent createShareArticleIntent() {
+        String articleInfo = String.format("Article title:\n%s\n\nJournal: %s\nvol:%s/issue: %s/year: %s",
+                mArticle.getTitle(), mArticle.getJournalInfo().getJournal().getTitle(),
+                mArticle.getJournalInfo().getVolume(), mArticle.getJournalInfo().getIssue(),
+                mArticle.getJournalInfo().getYearOfPublication());
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_TEXT, articleInfo);
+        return intent;
     }
 
     private void populateFragmentElements() {

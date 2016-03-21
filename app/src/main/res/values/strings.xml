@@ -29,4 +29,5 @@
     <string name="no_number">0</string>
     <string name="journal_label">Journal:</string>
     <string name="article_info_label">Article information</string>
+    <string name="menu_share_action">Share</string>
 </resources>
