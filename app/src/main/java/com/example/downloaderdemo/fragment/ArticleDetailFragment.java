@@ -37,7 +37,6 @@ public class ArticleDetailFragment extends BaseFragment{
     private TextView mKeywords;
     private TextView mAbstract;
 
-
     public ArticleDetailFragment() {}
 
     public static ArticleDetailFragment newInstance(Article article) {
@@ -74,24 +73,14 @@ public class ArticleDetailFragment extends BaseFragment{
             toolbar.setNavigationIcon(R.drawable.ic_action_back_black);
         }
 
-//        // set collapsing toolbar title
-//        CollapsingToolbarLayout collapsingToolbar = (CollapsingToolbarLayout) mView.findViewById(R.id.toolbar_layout);
-//        if(collapsingToolbar != null) {
-//            collapsingToolbar.setTitle("Hello ma");
-//        }
-
         return mView;
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.menu_share, menu);
-
-        // retrieve the shareActionProvider menu item &  enable it
         MenuItem menuItem = menu.findItem(R.id.action_share);
-//        mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(menuItem);
-//        if(mArticle != null)
-//            mShareActionProvider.setShareIntent(createShareArticleIntent());
+        menuItem.setIntent(createShareArticleIntent());
     }
 
     private Intent createShareArticleIntent() {
