@@ -3,8 +3,10 @@ package com.example.downloaderdemo.fragment;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.ShareActionProvider;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -57,9 +59,27 @@ public class ArticleDetailFragment extends BaseFragment{
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        mView = inflater.inflate(R.layout.fragment_detail, container, false);
+        mView = inflater.inflate(R.layout.fragment_detail_container, container, false);
         cacheFragmentElements();
         populateFragmentElements();
+
+        // set toolbar
+        Toolbar toolbar = (Toolbar) mView.findViewById(R.id.toolbar);
+        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+
+        ActionBar actionBar = ((AppCompatActivity)getActivity()).getSupportActionBar();
+        if(actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setDisplayShowTitleEnabled(false);
+            toolbar.setNavigationIcon(R.drawable.ic_action_back_black);
+        }
+
+//        // set collapsing toolbar title
+//        CollapsingToolbarLayout collapsingToolbar = (CollapsingToolbarLayout) mView.findViewById(R.id.toolbar_layout);
+//        if(collapsingToolbar != null) {
+//            collapsingToolbar.setTitle("Hello ma");
+//        }
+
         return mView;
     }
 
@@ -69,16 +89,18 @@ public class ArticleDetailFragment extends BaseFragment{
 
         // retrieve the shareActionProvider menu item &  enable it
         MenuItem menuItem = menu.findItem(R.id.action_share);
-        mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(menuItem);
-        if(mArticle != null)
-            mShareActionProvider.setShareIntent(createShareArticleIntent());
+//        mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(menuItem);
+//        if(mArticle != null)
+//            mShareActionProvider.setShareIntent(createShareArticleIntent());
     }
 
     private Intent createShareArticleIntent() {
+
         String articleInfo = String.format("Article title:\n%s\n\nJournal: %s\nvol:%s/issue: %s/year: %s",
                 mArticle.getTitle(), mArticle.getJournalInfo().getJournal().getTitle(),
                 mArticle.getJournalInfo().getVolume(), mArticle.getJournalInfo().getIssue(),
                 mArticle.getJournalInfo().getYearOfPublication());
+
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
         intent.setType("text/plain");

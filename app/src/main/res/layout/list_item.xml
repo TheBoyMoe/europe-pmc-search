@@ -13,9 +13,7 @@
     <TextView
         android:id="@+id/article_title"
         tools:text="Anaemia and the secondary causes of consuming to many cakes"
-        android:textColor="@color/colorPrimaryText"
-        android:textSize="15sp"
-        android:singleLine="true"
+        style="@style/TextStyle.Title.ListItem"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
@@ -29,17 +27,15 @@
 
         <TextView
             android:text="@string/authors_label"
+            style="@style/TextStyle.Subheading"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
         <TextView
             android:id="@+id/article_authors"
             tools:text="A. Samuels, T. Pipps, J.A. Brown, et al"
-            android:singleLine="true"
-            android:paddingLeft="@dimen/dimen_xsmall"
-            android:paddingStart="@dimen/dimen_xsmall"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            style="@style/TextStyle.Body.Figures"
+            android:layout_width="match_parent"/>
 
     </LinearLayout>
 
@@ -53,17 +49,14 @@
 
         <TextView
             android:text="@string/journal_label"
+            style="@style/TextStyle.Subheading"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
         <TextView
             android:id="@+id/journal_title"
             tools:text="Journal of Biological Medicine"
-            android:singleLine="true"
-            android:paddingLeft="@dimen/dimen_xsmall"
-            android:paddingStart="@dimen/dimen_xsmall"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            style="@style/TextStyle.Body.Figures"/>
 
     </LinearLayout>
 
@@ -82,18 +75,13 @@
             android:layout_height="wrap_content">
 
             <TextView
-                android:text="@string/year_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                style="@style/TextStyle.Body"
+                android:text="@string/year_label"/>
 
             <TextView
                 android:id="@+id/publication_year"
                 tools:text="2014"
-                android:singleLine="true"
-                android:paddingLeft="@dimen/dimen_xsmall"
-                android:paddingStart="@dimen/dimen_xsmall"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                style="@style/TextStyle.Body.Figures"/>
 
         </LinearLayout>
 
@@ -107,35 +95,26 @@
 
             <TextView
                 android:text="@string/volume_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                style="@style/TextStyle.Body"/>
 
 
             <TextView
                 android:id="@+id/journal_volume"
-                android:paddingLeft="@dimen/dimen_xsmall"
-                android:paddingStart="@dimen/dimen_xsmall"
-                tools:text="131"
-                android:singleLine="true"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                style="@style/TextStyle.Body.Figures"
+                tools:text="131"/>
 
             <TextView
                 android:text="@string/left_bracket"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                style="@style/TextStyle.Body"/>
 
             <TextView
                 android:id="@+id/journal_issue"
                 tools:text="12"
-                android:singleLine="true"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                style="@style/TextStyle.Body.Figures"/>
 
             <TextView
                 android:text="@string/right_bracket"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                style="@style/TextStyle.Body"/>
 
 
         </LinearLayout>
@@ -151,46 +130,34 @@
 
             <TextView
                 android:text="@string/page_info_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                style="@style/TextStyle.Body"/>
 
             <TextView
                 android:id="@+id/page_information"
-                android:paddingLeft="@dimen/dimen_xsmall"
-                android:paddingStart="@dimen/dimen_xsmall"
                 tools:text="110-24"
-                android:singleLine="true"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                style="@style/TextStyle.Body.Figures"/>
 
         </LinearLayout>
 
 
         <!-- citations -->
-        <!--<LinearLayout-->
-            <!--android:orientation="horizontal"-->
-            <!--android:paddingLeft="@dimen/dimen_small"-->
-            <!--android:paddingStart="@dimen/dimen_small"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content">-->
+        <LinearLayout
+            android:orientation="horizontal"
+            android:paddingLeft="@dimen/dimen_small"
+            android:paddingStart="@dimen/dimen_small"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
 
-            <!--<TextView-->
-                <!--android:text="@string/cited_label"-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="wrap_content"/>-->
+            <TextView
+                android:text="@string/cited_label"
+                style="@style/TextStyle.Body"/>
 
-            <!--<TextView-->
-                <!--android:id="@+id/cited_times"-->
-                <!--android:singleLine="true"-->
-                <!--tools:text="4"-->
-                <!--android:paddingLeft="@dimen/dimen_xsmall"-->
-                <!--android:paddingStart="@dimen/dimen_xsmall"-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="wrap_content"/>-->
+            <TextView
+                android:id="@+id/cited_times"
+                style="@style/TextStyle.Body.Figures"
+                tools:text="4"/>
 
-
-        <!--</LinearLayout>-->
-
+        </LinearLayout>
 
 
     </LinearLayout>

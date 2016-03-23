@@ -23,4 +23,49 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light"/>
 
+
+    <!-- text styles -->
+    <style name="TextStyle">
+        <item name="android:textColor">@color/colorPrimaryText</item>
+    </style>
+
+    <style name="TextStyle.Title">
+        <item name="android:textAppearance">@style/TextAppearance.AppCompat.Title</item>
+        <item name="android:maxLines">2</item>
+        <item name="android:ellipsize">end</item>
+    </style>
+
+    <style name="TextStyle.Title.ListItem">
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="TextStyle.Subheading">
+        <item name="android:fontFamily">sans-serif-condensed</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="TextStyle.Body">
+        <item name="android:fontFamily">sans-serif-light</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <style name="TextStyle.Body.Keywords">
+        <item name="android:lineSpacingExtra">@dimen/line_spacing</item>
+    </style>
+
+    <style name="TextStyle.Body.Abstract">
+        <item name="android:maxLines">18</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:lineSpacingExtra">@dimen/line_spacing_extra</item>
+    </style>
+
+    <style name="TextStyle.Body.Figures">
+        <item name="android:singleLine">true</item>
+        <item name="android:paddingLeft">@dimen/dimen_xsmall</item>
+        <item name="android:paddingStart">@dimen/dimen_xsmall</item>
+    </style>
+
+
 </resources>
