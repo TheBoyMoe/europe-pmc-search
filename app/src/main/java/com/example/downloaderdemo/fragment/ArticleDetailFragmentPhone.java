@@ -20,7 +20,7 @@ import com.example.downloaderdemo.model.Article;
 
 import java.util.List;
 
-public class ArticleDetailFragment extends BaseFragment{
+public class ArticleDetailFragmentPhone extends BaseFragment{
 
     public static final String ARTICLE_ITEM = "journal";
     private ShareActionProvider mShareActionProvider;
@@ -37,10 +37,10 @@ public class ArticleDetailFragment extends BaseFragment{
     private TextView mKeywords;
     private TextView mAbstract;
 
-    public ArticleDetailFragment() {}
+    public ArticleDetailFragmentPhone() {}
 
-    public static ArticleDetailFragment newInstance(Article article) {
-        ArticleDetailFragment fragment = new ArticleDetailFragment();
+    public static ArticleDetailFragmentPhone newInstance(Article article) {
+        ArticleDetailFragmentPhone fragment = new ArticleDetailFragmentPhone();
         Bundle args = new Bundle();
         args.putParcelable(ARTICLE_ITEM, article);
         fragment.setArguments(args);
@@ -58,7 +58,7 @@ public class ArticleDetailFragment extends BaseFragment{
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        mView = inflater.inflate(R.layout.fragment_detail_container, container, false);
+        mView = inflater.inflate(R.layout.fragment_detail_phone_container, container, false);
         cacheFragmentElements();
         populateFragmentElements();
 
@@ -78,7 +78,7 @@ public class ArticleDetailFragment extends BaseFragment{
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.menu_share, menu);
+        inflater.inflate(R.menu.menu_share_phone, menu);
         MenuItem menuItem = menu.findItem(R.id.action_share);
         menuItem.setIntent(createShareArticleIntent());
     }

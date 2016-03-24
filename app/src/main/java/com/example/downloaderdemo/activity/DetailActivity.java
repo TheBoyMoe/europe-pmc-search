@@ -4,7 +4,8 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
 import com.example.downloaderdemo.R;
-import com.example.downloaderdemo.fragment.ArticleDetailFragment;
+import com.example.downloaderdemo.fragment.ArticleDetailFragmentPhone;
+import com.example.downloaderdemo.fragment.ArticleDetailFragmentTablet;
 import com.example.downloaderdemo.model.Article;
 
 public class DetailActivity extends AppCompatActivity{
@@ -15,12 +16,12 @@ public class DetailActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
-        Article article = getIntent().getParcelableExtra(ArticleDetailFragment.ARTICLE_ITEM);
+        Article article = getIntent().getParcelableExtra(ArticleDetailFragmentTablet.ARTICLE_ITEM);
 
-        ArticleDetailFragment articleDetailFragment = (ArticleDetailFragment) getSupportFragmentManager().findFragmentById(R.id.detail_fragment_container);
-        if(articleDetailFragment == null) {
+        ArticleDetailFragmentPhone phoneFragment = (ArticleDetailFragmentPhone) getSupportFragmentManager().findFragmentById(R.id.fragment_detail_phone_container);
+        if(phoneFragment == null) {
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.detail_fragment_container, ArticleDetailFragment.newInstance(article))
+                    .add(R.id.fragment_detail_phone_container, ArticleDetailFragmentPhone.newInstance(article))
                     .commit();
         }
 

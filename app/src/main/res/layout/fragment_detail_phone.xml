@@ -5,10 +5,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimaryBackground"
+    android:background="@color/colorLightPrimary"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.example.scrollingdetailactivity.ScrollingActivity"
-    tools:showIn="@layout/fragment_detail_container">
+    tools:showIn="@layout/fragment_detail_phone_container">
 
 
     <LinearLayout
@@ -42,6 +42,7 @@
             android:paddingRight="@dimen/dimen_large"
             android:paddingEnd="@dimen/dimen_large"
             android:paddingBottom="@dimen/dimen_large"
+            android:background="@color/colorPrimaryBackground"
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
@@ -220,7 +221,6 @@
         <!-- article abstract -->
         <LinearLayout
             android:orientation="vertical"
-            android:background="@color/colorLightPrimary"
             android:paddingTop="@dimen/dimen_normal"
             android:paddingLeft="@dimen/dimen_large"
             android:paddingStart="@dimen/dimen_large"

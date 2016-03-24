@@ -23,7 +23,7 @@
 
 
     <FrameLayout
-        android:id="@+id/detail_fragment_container"
+        android:id="@+id/fragment_detail_tablet_container"
         android:layout_width="0dp"
         android:layout_weight="1"
         android:layout_height="match_parent"/>

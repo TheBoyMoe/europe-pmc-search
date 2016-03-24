@@ -12,7 +12,8 @@ import com.example.downloaderdemo.R;
 import com.example.downloaderdemo.event.DataModelUpdateEvent;
 import com.example.downloaderdemo.event.OnListItemClickEvent;
 import com.example.downloaderdemo.event.QueryCompletionEvent;
-import com.example.downloaderdemo.fragment.ArticleDetailFragment;
+import com.example.downloaderdemo.fragment.ArticleDetailFragmentPhone;
+import com.example.downloaderdemo.fragment.ArticleDetailFragmentTablet;
 import com.example.downloaderdemo.fragment.ArticleListFragment;
 import com.example.downloaderdemo.fragment.ModelFragment;
 import com.example.downloaderdemo.model.Article;
@@ -59,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // determine if there is a frame in which to embed the detail fragment, eg on tablet
-        View detailPane = findViewById(R.id.detail_fragment_container);
+        View detailPane = findViewById(R.id.fragment_detail_tablet_container);
         mDualPane = detailPane != null && detailPane.getVisibility() == View.VISIBLE;
 
     }
@@ -88,12 +89,12 @@ public class MainActivity extends AppCompatActivity {
             if(mDualPane) {
                 // swap the current fragment
                 getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.detail_fragment_container, ArticleDetailFragment.newInstance(article))
+                        .replace(R.id.fragment_detail_tablet_container, ArticleDetailFragmentTablet.newInstance(article))
                         .commit();
             } else {
                 // on phones
                 Intent intent = new Intent(this, DetailActivity.class);
-                intent.putExtra(ArticleDetailFragment.ARTICLE_ITEM, article);
+                intent.putExtra(ArticleDetailFragmentPhone.ARTICLE_ITEM, article);
                 startActivity(intent);
             }
         }
@@ -115,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
                     Article article = mModelFragment.getArticle(0); // initial position
 
                     getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.detail_fragment_container, ArticleDetailFragment.newInstance(article))
+                            .replace(R.id.fragment_detail_tablet_container, ArticleDetailFragmentTablet.newInstance(article))
                             .commit();
                 }
             }

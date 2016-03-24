@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorLightPrimary"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="com.example.scrollingdetailactivity.ScrollingActivity"
+    tools:showIn="@layout/content_main_sw720dp">
+
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- article information-->
+        <LinearLayout
+            android:padding="@dimen/dimen_large"
+            android:background="@color/colorPrimaryBackground"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/article_title"
+                tools:text="Anaemia and the secondary causes of consuming to many cakes"
+                style="@style/TextStyle.Title"
+                android:paddingBottom="@dimen/dimen_small"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <!-- authors -->
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:text="@string/authors_label"
+                    style="@style/TextStyle.Subheading"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <TextView
+                    android:id="@+id/article_authors"
+                    tools:text="A. Samuels, T. Pipps, J.A. Brown, et al"
+                    style="@style/TextStyle.Body.Figures"
+                    android:layout_width="match_parent"/>
+
+            </LinearLayout>
+
+
+            <!-- Journal title-->
+            <LinearLayout
+                android:orientation="horizontal"
+                android:paddingTop="@dimen/dimen_xsmall"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:text="@string/journal_label"
+                    style="@style/TextStyle.Subheading"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+
+                <TextView
+                    android:id="@+id/journal_title"
+                    style="@style/TextStyle.Body.Figures"
+                    tools:text="Journal of Biological Medicine"/>
+
+            </LinearLayout>
+
+
+            <!-- Journal info -->
+            <LinearLayout
+                android:orientation="horizontal"
+                android:paddingTop="@dimen/dimen_xsmall"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <!-- year -->
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        style="@style/TextStyle.Body"
+                        android:text="@string/year_label"/>
+
+                    <TextView
+                        android:id="@+id/publication_year"
+                        tools:text="2014"
+                        style="@style/TextStyle.Body.Figures"/>
+
+                </LinearLayout>
+
+                <!-- volume/issue -->
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:paddingLeft="@dimen/dimen_small"
+                    android:paddingStart="@dimen/dimen_small"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:text="@string/volume_label"
+                        style="@style/TextStyle.Body"/>
+
+
+                    <TextView
+                        android:id="@+id/journal_volume"
+                        style="@style/TextStyle.Body.Figures"
+                        tools:text="131"/>
+
+                    <TextView
+                        android:text="@string/left_bracket"
+                        style="@style/TextStyle.Body"/>
+
+                    <TextView
+                        android:id="@+id/journal_issue"
+                        tools:text="12"
+                        style="@style/TextStyle.Body.Figures"/>
+
+                    <TextView
+                        android:text="@string/right_bracket"
+                        style="@style/TextStyle.Body"/>
+
+
+                </LinearLayout>
+
+
+                <!-- page -->
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:paddingLeft="@dimen/dimen_small"
+                    android:paddingStart="@dimen/dimen_small"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:text="@string/page_info_label"
+                        style="@style/TextStyle.Body"/>
+
+                    <TextView
+                        android:id="@+id/page_information"
+                        tools:text="110-24"
+                        style="@style/TextStyle.Body.Figures"/>
+
+                </LinearLayout>
+
+
+                <!-- citations -->
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:paddingLeft="@dimen/dimen_small"
+                    android:paddingStart="@dimen/dimen_small"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:text="@string/cited_label"
+                        style="@style/TextStyle.Body"/>
+
+                    <TextView
+                        android:id="@+id/cited_times"
+                        style="@style/TextStyle.Body.Figures"
+                        tools:text="4"/>
+
+                </LinearLayout>
+
+
+            </LinearLayout>
+
+
+            <!-- keywords -->
+            <TextView
+                android:text="@string/keywords_label"
+                android:paddingTop="@dimen/dimen_small"
+                style="@style/TextStyle.Subheading"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+
+            <TextView
+                android:id="@+id/article_keywords"
+                tools:text="anaemia, chocolate, cakes, greed, glutony"
+                style="@style/TextStyle.Body.Keywords"
+                android:layout_width="match_parent"/>
+
+        </LinearLayout>
+
+
+        <!-- article abstract -->
+        <LinearLayout
+            android:orientation="vertical"
+            android:paddingTop="@dimen/dimen_normal"
+            android:paddingLeft="@dimen/dimen_large"
+            android:paddingStart="@dimen/dimen_large"
+            android:paddingRight="@dimen/dimen_large"
+            android:paddingEnd="@dimen/dimen_large"
+            android:paddingBottom="@dimen/dimen_large"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:text="@string/abstract_label"
+                style="@style/TextStyle.Subheading"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:id="@+id/article_abstract"
+                tools:text="@string/abstract_text"
+                style="@style/TextStyle.Body.Abstract"
+                android:layout_width="match_parent"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+</android.support.v4.widget.NestedScrollView>
