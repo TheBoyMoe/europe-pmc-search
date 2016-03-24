@@ -1,5 +1,6 @@
 package com.example.downloaderdemo.fragment;
 
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -35,7 +36,11 @@ public class ArticleDetailFragmentTablet extends ArticleDetailFragment{
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        mView = inflater.inflate(R.layout.fragment_detail_tablet, container, false);
+        int orientation = getActivity().getResources().getConfiguration().orientation;
+        if(orientation == Configuration.ORIENTATION_PORTRAIT)
+            mView = inflater.inflate(R.layout.fragment_detail_tablet_port, container, false);
+        else
+            mView = inflater.inflate(R.layout.fragment_detail_tablet_land, container, false);
         cacheFragmentElements();
         populateFragmentElements();
 

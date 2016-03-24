@@ -13,8 +13,12 @@
     <dimen name="dimen_divider">1dp</dimen>
 
     <dimen name="dimen_list_item_spacer">12px</dimen>
-    <dimen name="app_bar_height">180dp</dimen>
+    <dimen name="appbar_height">180dp</dimen>
+    <dimen name="appbar_elevation">4dp</dimen>
+    <dimen name="cardview_elevation">6dp</dimen>
+    <dimen name="list_item_extra_padding">0dp</dimen>
     <dimen name="line_spacing">4dp</dimen>
     <dimen name="line_spacing_extra">6dp</dimen>
+    <dimen name="tablet_cardview_height">400dp</dimen>
 
 </resources>

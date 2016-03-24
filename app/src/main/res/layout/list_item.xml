@@ -141,23 +141,23 @@
 
 
         <!-- citations -->
-        <LinearLayout
-            android:orientation="horizontal"
-            android:paddingLeft="@dimen/dimen_small"
-            android:paddingStart="@dimen/dimen_small"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+        <!--<LinearLayout-->
+            <!--android:orientation="horizontal"-->
+            <!--android:paddingLeft="@dimen/dimen_small"-->
+            <!--android:paddingStart="@dimen/dimen_small"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content">-->
 
-            <TextView
-                android:text="@string/cited_label"
-                style="@style/TextStyle.Body"/>
+            <!--<TextView-->
+                <!--android:text="@string/cited_label"-->
+                <!--style="@style/TextStyle.Body"/>-->
 
-            <TextView
-                android:id="@+id/cited_times"
-                style="@style/TextStyle.Body.Figures"
-                tools:text="4"/>
+            <!--<TextView-->
+                <!--android:id="@+id/cited_times"-->
+                <!--style="@style/TextStyle.Body.Figures"-->
+                <!--tools:text="4"/>-->
 
-        </LinearLayout>
+        <!--</LinearLayout>-->
 
 
     </LinearLayout>

@@ -23,7 +23,7 @@ public class ArticleDetailFragment extends BaseFragment{
     private TextView mVolume;
     private TextView mIssue;
     private TextView mPage;
-    private TextView mCited;
+    //private TextView mCited;
     private TextView mKeywords;
     private TextView mAbstract;
 
@@ -50,7 +50,7 @@ public class ArticleDetailFragment extends BaseFragment{
         mAuthors.setText(mArticle.getAuthorString());
         mPage.setText(mArticle.getPageInfo());
         mAbstract.setText(mArticle.getAbstractText());
-        mCited.setText(String.valueOf(mArticle.getCitedByCount()));
+        //mCited.setText(String.valueOf(mArticle.getCitedByCount()));
 
         if(mArticle.getJournalInfo().getYearOfPublication() == 0) {
             mYearOfPublication.setText(getString(R.string.na_label));
@@ -79,7 +79,7 @@ public class ArticleDetailFragment extends BaseFragment{
         mVolume = (TextView) mView.findViewById(R.id.journal_volume);
         mIssue = (TextView) mView.findViewById(R.id.journal_issue);
         mPage = (TextView) mView.findViewById(R.id.page_information);
-        mCited = (TextView) mView.findViewById(R.id.cited_times);
+        //mCited = (TextView) mView.findViewById(R.id.cited_times);
         mKeywords = (TextView) mView.findViewById(R.id.article_keywords);
         mAbstract = (TextView) mView.findViewById(R.id.article_abstract);
     }

@@ -34,11 +34,21 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         mCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinator_layout);
+
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        if(getSupportActionBar() != null)
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+
+        // set the overflow icon and title colour on tablets
+//        Configuration config = this.getResources().getConfiguration();
+//        int smallestScreenWidthDp = config.smallestScreenWidthDp;
+//        if (smallestScreenWidthDp >= 600) {
+//            toolbar.setOverflowIcon(ContextCompat.getDrawable(this, R.drawable.ic_action_overflow_white));
+//            toolbar.setTitleTextColor(ContextCompat.getColor(this, R.color.colorPrimaryBackground));
+//        }
 
         mModelFragment = (ModelFragment) getSupportFragmentManager().findFragmentByTag(MODEL_FRAGMENT_TAG);
         if(mModelFragment == null) {
