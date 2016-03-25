@@ -30,5 +30,6 @@
     <string name="journal_label">Journal:</string>
     <string name="article_info_label">Article information</string>
     <string name="menu_share_action">Share</string>
+    <string name="application_logo_description">Application logo</string>
 
 </resources>

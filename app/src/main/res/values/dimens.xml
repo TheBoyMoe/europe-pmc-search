@@ -20,5 +20,6 @@
     <dimen name="line_spacing">4dp</dimen>
     <dimen name="line_spacing_extra">6dp</dimen>
     <dimen name="tablet_cardview_height">400dp</dimen>
+    <dimen name="dimen_app_logo_size">120dp</dimen>
 
 </resources>
