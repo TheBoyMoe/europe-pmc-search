@@ -154,14 +154,14 @@ public class ArticleListFragment extends BaseFragment{
                 mTotalItemCount = mLayoutManager.getItemCount();
                 mFirstVisibleItem = mLayoutManager.findFirstVisibleItemPosition();
 
-                if(mLoading) {
-                    if(mTotalItemCount > mPreviousTotal) {
+                if (mLoading) {
+                    if (mTotalItemCount > mPreviousTotal) {
                         mLoading = false;
                         mPreviousTotal = mTotalItemCount;
                     }
                 }
-                if(!mLoading && (mTotalItemCount - mVisibleItemCount)
-                        <= (mFirstVisibleItem  + mVisibleThreshold)) {
+                if (!mLoading && (mTotalItemCount - mVisibleItemCount)
+                        <= (mFirstVisibleItem + mVisibleThreshold)) {
                     // end of page has been reached, download more items
                     mLoading = true;
                     executeSearchQuery(); // download more results
@@ -233,19 +233,21 @@ public class ArticleListFragment extends BaseFragment{
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if(item.getItemId() == R.id.clear_search) {
-
-            // clear user's search history & shared prefs
-            if(sRecentSuggestions != null) {
-                ConfirmationDialogFragment dialog = new ConfirmationDialogFragment();
-                //dialog.show(getFragmentManager(), "Clear history");
-                dialog.show(getFragmentManager(), "Clear history");
-            } else {
-                Utils.showSnackbar(mView, "History clear");
-            }
-            return true;
+        switch (item.getItemId()) {
+            case R.id.clear_search:
+                // clear user's search history & shared prefs
+                if(sRecentSuggestions != null) {
+                    ConfirmationDialogFragment dialog = new ConfirmationDialogFragment();
+                    //dialog.show(getFragmentManager(), "Clear history");
+                    dialog.show(getFragmentManager(), "Clear history");
+                } else {
+                    Utils.showSnackbar(mView, "History clear");
+                }
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
-        return super.onOptionsItemSelected(item);
+
     }
 
 

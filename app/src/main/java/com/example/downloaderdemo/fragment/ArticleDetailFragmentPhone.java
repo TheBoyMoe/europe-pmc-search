@@ -38,7 +38,7 @@ public class ArticleDetailFragmentPhone extends ArticleDetailFragment{
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        mView = inflater.inflate(R.layout.fragment_detail_phone_container, container, false);
+        mView = inflater.inflate(R.layout.fragment_detail_phone, container, false);
         cacheFragmentElements();
         populateFragmentElements();
 
@@ -63,5 +63,14 @@ public class ArticleDetailFragmentPhone extends ArticleDetailFragment{
         menuItem.setIntent(createShareArticleIntent());
     }
 
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if(item.getItemId() == android.R.id.home) {
+            super.getActivity().onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
 }

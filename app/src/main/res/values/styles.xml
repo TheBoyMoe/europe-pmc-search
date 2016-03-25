@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
@@ -22,6 +22,11 @@
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light"/>
+
+    <!-- transition styles -->
+    <style name="AppTheme.Main" parent="AppTheme.NoActionBar"/>
+
+    <style name="AppTheme.Details" parent="AppTheme.NoActionBar"/>
 
 
     <!-- text styles -->
@@ -64,7 +69,7 @@
     <style name="TextStyle.Body.Figures">
         <item name="android:singleLine">true</item>
         <item name="android:paddingLeft">@dimen/dimen_xsmall</item>
-        <item name="android:paddingStart">@dimen/dimen_xsmall</item>
+        <item name="android:paddingStart" tools:targetApi="jelly_bean_mr1">@dimen/dimen_xsmall</item>
     </style>
 
 
