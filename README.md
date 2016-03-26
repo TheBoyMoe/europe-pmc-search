@@ -21,6 +21,7 @@ Screenshots
 -----------
 
 ![Phone](screenshots/phone_interaction.gif "Interacting with the app on a phone")
+
 ![Tablet](screenshots/tablet_screenshot.png "Tabletscreenshot")
 
 MIT License
