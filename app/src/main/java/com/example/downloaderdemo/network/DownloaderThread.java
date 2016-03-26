@@ -3,6 +3,7 @@ package com.example.downloaderdemo.network;
 import android.net.Uri;
 
 import com.example.downloaderdemo.EuroPMCApplication;
+import com.example.downloaderdemo.event.MessageEvent;
 import com.example.downloaderdemo.event.QueryCompletionEvent;
 import com.example.downloaderdemo.model.ResultQuery;
 import com.facebook.stetho.okhttp.StethoInterceptor;
@@ -83,6 +84,7 @@ public class DownloaderThread extends Thread{
 
                 } else {
                     Timber.e("Http response: %s", response.toString());
+                    EuroPMCApplication.postToBus(new MessageEvent(MessageEvent.ERROR_EXECUTING_QUERY));
                 }
 
             } catch (IOException e) {

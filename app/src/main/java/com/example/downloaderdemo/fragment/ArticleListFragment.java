@@ -93,6 +93,7 @@ public class ArticleListFragment extends BaseFragment{
         return new ArticleListFragment();
     }
 
+    // set a copy of the data models cache & update the article list's adapter
     public void setModelDataSet(ArrayList<Article> list) {
         mAdapter.clearAll();
         mAdapter.addAll(list);
@@ -119,7 +120,7 @@ public class ArticleListFragment extends BaseFragment{
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         mView = inflater.inflate(R.layout.recycler_view, container, false);
         mEmptyView = (TextView) mView.findViewById(R.id.empty_view);
@@ -203,7 +204,6 @@ public class ArticleListFragment extends BaseFragment{
 
             @Override
             public boolean onQueryTextSubmit(String query) {
-
                 if (query != null && !query.isEmpty()) {
                     mQuery = query;
 
@@ -211,11 +211,7 @@ public class ArticleListFragment extends BaseFragment{
                     sRecentSuggestions = new SearchRecentSuggestions(getActivity(),
                             QuerySuggestionProvider.AUTHORITY, QuerySuggestionProvider.MODE);
                     sRecentSuggestions.saveRecentQuery(mQuery, null);
-
                     executeSearchQuery();
-
-                } else {
-                    Utils.showSnackbar(mView, "Enter a search query");
                 }
 
                 // hide the soft keyboard
@@ -223,7 +219,7 @@ public class ArticleListFragment extends BaseFragment{
 
                 // close the search view
                 mSearchMenuItem.collapseActionView();
-                return true;
+                 return true;
             }
 
             @Override
@@ -267,15 +263,17 @@ public class ArticleListFragment extends BaseFragment{
                     mRecyclerView.setVisibility(View.GONE);
                 }
             } else {
-                Utils.showSnackbar(mView, "No more results, enter a query");
+                Utils.showSnackbar(mView, "Enter a valid query");
             }
         } else {
-            Utils.showSnackbar(getActivity().findViewById(R.id.coordinator_layout), "No network connection");
+            Utils.showSnackbar(mView, "No network connection");
         }
     }
 
 
     private void updateUI() {
+
+        mInProgress.setVisibility(View.GONE);
 
         if(mAdapter.getItemCount() > 0) {
             mRecyclerView.setVisibility(View.VISIBLE);
@@ -287,13 +285,11 @@ public class ArticleListFragment extends BaseFragment{
         else {
             // no records to show
             if(mFirstTimeIn) {
-                mEmptyView.setVisibility(View.VISIBLE);
                 mRecyclerView.setVisibility(View.GONE);
-                Utils.showSnackbar(mView, "No results available in the database");
             }
         }
         mFirstTimeIn = false;
-        mInProgress.setVisibility(View.GONE);
+
     }
 
 
@@ -309,9 +305,9 @@ public class ArticleListFragment extends BaseFragment{
     @Subscribe
     public void getMessage(MessageEvent event) {
         if(event.getMessage().equals(MessageEvent.NO_RESULTS_RETURNED_FROM_QUERY)) {
-            mEmptyView.setVisibility(View.VISIBLE);
+            mInProgress.setVisibility(View.GONE);
             mRecyclerView.setVisibility(View.GONE);
-            Utils.showSnackbar(mView, "No results available");
+            mEmptyView.setVisibility(View.VISIBLE);
         }
     }
 

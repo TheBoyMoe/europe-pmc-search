@@ -12,6 +12,7 @@ import android.view.View;
 import com.example.downloaderdemo.EuroPMCApplication;
 import com.example.downloaderdemo.R;
 import com.example.downloaderdemo.event.DataModelUpdateEvent;
+import com.example.downloaderdemo.event.MessageEvent;
 import com.example.downloaderdemo.event.OnListItemClickEvent;
 import com.example.downloaderdemo.event.QueryCompletionEvent;
 import com.example.downloaderdemo.fragment.ArticleDetailFragmentPhone;
@@ -43,14 +44,6 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         if(getSupportActionBar() != null)
             getSupportActionBar().setDisplayShowTitleEnabled(false);
-
-        // set the overflow icon and title colour on tablets
-//        Configuration config = this.getResources().getConfiguration();
-//        int smallestScreenWidthDp = config.smallestScreenWidthDp;
-//        if (smallestScreenWidthDp >= 600) {
-//            toolbar.setOverflowIcon(ContextCompat.getDrawable(this, R.drawable.ic_action_overflow_white));
-//            toolbar.setTitleTextColor(ContextCompat.getColor(this, R.color.colorPrimaryBackground));
-//        }
 
         mModelFragment = (ModelFragment) getSupportFragmentManager().findFragmentByTag(MODEL_FRAGMENT_TAG);
         if(mModelFragment == null) {
@@ -144,4 +137,13 @@ public class MainActivity extends AppCompatActivity {
             Utils.showSnackbar(mCoordinatorLayout, String.format("Downloading more articles, %d so far", mModelFragment.getSize() + 20));
         }
     }
+
+    @Subscribe
+    public void checkForMessages(MessageEvent event){
+        if(event.getMessage().equals(MessageEvent.ERROR_EXECUTING_QUERY))
+            Utils.showSnackbar(mCoordinatorLayout, "Error executing query");
+        if(event.getMessage().equals(MessageEvent.NO_RESULTS_RETURNED_FROM_QUERY))
+            Utils.showSnackbar(mCoordinatorLayout, "Search unsuccessful");
+    }
+
 }

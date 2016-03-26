@@ -14,8 +14,8 @@ import com.example.downloaderdemo.EuroPMCApplication;
 import com.example.downloaderdemo.R;
 import com.example.downloaderdemo.event.DataModelUpdateEvent;
 import com.example.downloaderdemo.event.MessageEvent;
-import com.example.downloaderdemo.event.QueryEvent;
 import com.example.downloaderdemo.event.QueryCompletionEvent;
+import com.example.downloaderdemo.event.QueryEvent;
 import com.example.downloaderdemo.model.Article;
 import com.example.downloaderdemo.model.Journal;
 import com.example.downloaderdemo.model.JournalInfo;
@@ -23,7 +23,6 @@ import com.example.downloaderdemo.model.KeywordList;
 import com.example.downloaderdemo.network.DownloaderThread;
 import com.example.downloaderdemo.util.DatabaseHelper;
 import com.example.downloaderdemo.util.QueryPreferences;
-import com.example.downloaderdemo.util.Utils;
 import com.squareup.otto.Subscribe;
 
 import java.util.ArrayList;
@@ -83,6 +82,7 @@ public class ModelFragment extends BaseFragment{
     }
 
 
+    // execute the search query
     @Subscribe
     public void getSearchQuery(QueryEvent event) {
 
@@ -93,7 +93,6 @@ public class ModelFragment extends BaseFragment{
         mQuery = QueryPreferences.getSavedPrefValue(getActivity(), QueryPreferences.QUERY_STRING);
         String page = QueryPreferences.getSavedPrefValue(getActivity(), QueryPreferences.CURRENT_PAGE);
         mCurrentPage = page != null ? Integer.valueOf(page) : 1;
-        Timber.i("Retrieved page count: %s, retrieved query: %s", page, mQuery);
 
         if(mQuery == null || !mQuery.equals(searchQuery)) {
             // if it's the first time thru or a new query
@@ -124,15 +123,15 @@ public class ModelFragment extends BaseFragment{
             Article[] list = resultList.toArray(new Article[resultList.size()]);
             mTask = new InsertTask().execute(list);
 
-            // update the page number & thread status
+            // update the page number
             ++mCurrentPage;
-            mIsRunning = false;
 
         } else if(resultList.size() == 0 && mQuery != null) {
-            Utils.showSnackbar(getActivity().findViewById(R.id.coordinator_layout), "No results found");
+            //Utils.showSnackbar(getActivity().findViewById(R.id.coordinator_layout), "No results found");
             EuroPMCApplication.postToBus(new MessageEvent(MessageEvent.NO_RESULTS_RETURNED_FROM_QUERY));
         }
-        Timber.i("Next page count: %d", mCurrentPage);
+        // update thread status, save current page
+        mIsRunning = false;
         QueryPreferences.setSavedPrefValue(getActivity(),
                 QueryPreferences.CURRENT_PAGE, String.valueOf(mCurrentPage));
     }
@@ -173,59 +172,54 @@ public class ModelFragment extends BaseFragment{
         @Override
         protected void onPostExecute(Cursor cursor) {
 
-            // convert the cursor to an arraylist of Article Pojos & update the datacache
-            Article article;
-            JournalInfo journalInfo;
-            Journal journal;
-            KeywordList keywordList;
-            mArticles.clear();
-            while(cursor.moveToNext()) {
+                // convert the cursor to an arraylist of Article Pojos & update the datacache
+                Article article;
+                JournalInfo journalInfo;
+                Journal journal;
+                KeywordList keywordList;
+                mArticles.clear();
+                while (cursor.moveToNext()) {
 
-                article = new Article();
-                journalInfo = new JournalInfo();
-                journal = new Journal();
-                keywordList = new KeywordList();
+                    article = new Article();
+                    journalInfo = new JournalInfo();
+                    journal = new Journal();
+                    keywordList = new KeywordList();
 
-                // populate article fields
-                article.setRowid(cursor.getInt(cursor.getColumnIndex(DatabaseHelper.ROW_ID)));
-                article.setId(cursor.getString(cursor.getColumnIndex(DatabaseHelper.ARTICLE_ID)));
-                article.setTitle(cursor.getString(cursor.getColumnIndex(DatabaseHelper.ARTICLE_TITLE)));
-                article.setAuthorString(cursor.getString(cursor.getColumnIndex(DatabaseHelper.AUTHOR_STRING)));
-                article.setPageInfo(cursor.getString(cursor.getColumnIndex(DatabaseHelper.PAGE_INFO)));
-                article.setAbstractText(cursor.getString(cursor.getColumnIndex(DatabaseHelper.ABSTRACT_TEXT)));
-                article.setCitedByCount(Long.valueOf(cursor.getString(cursor.getColumnIndex(DatabaseHelper.CITED))));
+                    // populate article fields
+                    article.setRowid(cursor.getInt(cursor.getColumnIndex(DatabaseHelper.ROW_ID)));
+                    article.setId(cursor.getString(cursor.getColumnIndex(DatabaseHelper.ARTICLE_ID)));
+                    article.setTitle(cursor.getString(cursor.getColumnIndex(DatabaseHelper.ARTICLE_TITLE)));
+                    article.setAuthorString(cursor.getString(cursor.getColumnIndex(DatabaseHelper.AUTHOR_STRING)));
+                    article.setPageInfo(cursor.getString(cursor.getColumnIndex(DatabaseHelper.PAGE_INFO)));
+                    article.setAbstractText(cursor.getString(cursor.getColumnIndex(DatabaseHelper.ABSTRACT_TEXT)));
+                    article.setCitedByCount(Long.valueOf(cursor.getString(cursor.getColumnIndex(DatabaseHelper.CITED))));
 
-                // populate journalInfo fields
-                journalInfo.setIssue(cursor.getString(cursor.getColumnIndex(DatabaseHelper.ISSUE)));
-                journalInfo.setVolume(cursor.getString(cursor.getColumnIndex(DatabaseHelper.VOLUME)));
-                journalInfo.setYearOfPublication(Long.valueOf(cursor.getString(cursor.getColumnIndex(DatabaseHelper.YEAR_OF_PUBLICATION))));
+                    // populate journalInfo fields
+                    journalInfo.setIssue(cursor.getString(cursor.getColumnIndex(DatabaseHelper.ISSUE)));
+                    journalInfo.setVolume(cursor.getString(cursor.getColumnIndex(DatabaseHelper.VOLUME)));
+                    journalInfo.setYearOfPublication(Long.valueOf(cursor.getString(cursor.getColumnIndex(DatabaseHelper.YEAR_OF_PUBLICATION))));
 
-                // populate Journal field
-                journal.setTitle(cursor.getString(cursor.getColumnIndex(DatabaseHelper.JOURNAL_TITLE)));
+                    // populate Journal field
+                    journal.setTitle(cursor.getString(cursor.getColumnIndex(DatabaseHelper.JOURNAL_TITLE)));
 
-                // populate Keywords List field
-                List<String> keywords = null;
-                String str = cursor.getString(cursor.getColumnIndex(DatabaseHelper.KEYWORD_LIST));
-                if(!str.equals(getString(R.string.na_label))) {
-                    keywords = Arrays.asList(str.split("\\s*,\\s*"));
+                    // populate Keywords List field
+                    List<String> keywords = null;
+                    String str = cursor.getString(cursor.getColumnIndex(DatabaseHelper.KEYWORD_LIST));
+                    if (!str.equals(getString(R.string.na_label))) {
+                        keywords = Arrays.asList(str.split("\\s*,\\s*"));
+                    }
+                    keywordList.setKeyword(keywords);
+
+                    // add the objects to article
+                    journalInfo.setJournal(journal);
+                    article.setJournalInfo(journalInfo);
+                    article.setKeywordList(keywordList);
+
+                    // add each article to the List of results
+                    mArticles.add(article);
                 }
-                keywordList.setKeyword(keywords);
-
-                // add the objects to article
-                journalInfo.setJournal(journal);
-                article.setJournalInfo(journalInfo);
-                article.setKeywordList(keywordList);
-
-                // add each article to the List of results
-                mArticles.add(article);
-            }
-
-            Timber.i("Datacache contains %d records", mArticles.size());
-
-            cursor.close();
-
-            // inform any interested parties that the data model has been updated
-            EuroPMCApplication.postToBus(new DataModelUpdateEvent(true));
+                cursor.close();
+                EuroPMCApplication.postToBus(new DataModelUpdateEvent(true));
 
         }
 
