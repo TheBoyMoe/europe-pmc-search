@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import com.example.downloaderdemo.EuroPMCApplication;
 import com.example.downloaderdemo.R;
 import com.example.downloaderdemo.event.DataModelUpdateEvent;
+import com.example.downloaderdemo.event.MessageEvent;
 import com.example.downloaderdemo.event.QueryEvent;
 import com.example.downloaderdemo.event.QueryCompletionEvent;
 import com.example.downloaderdemo.model.Article;
@@ -129,6 +130,7 @@ public class ModelFragment extends BaseFragment{
 
         } else if(resultList.size() == 0 && mQuery != null) {
             Utils.showSnackbar(getActivity().findViewById(R.id.coordinator_layout), "No results found");
+            EuroPMCApplication.postToBus(new MessageEvent(MessageEvent.NO_RESULTS_RETURNED_FROM_QUERY));
         }
         Timber.i("Next page count: %d", mCurrentPage);
         QueryPreferences.setSavedPrefValue(getActivity(),

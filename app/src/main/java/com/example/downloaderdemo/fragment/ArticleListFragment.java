@@ -21,16 +21,19 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.downloaderdemo.R;
 import com.example.downloaderdemo.adapter.CustomItemDecoration;
 import com.example.downloaderdemo.adapter.ListItemAdapter;
+import com.example.downloaderdemo.event.MessageEvent;
 import com.example.downloaderdemo.event.QueryEvent;
 import com.example.downloaderdemo.model.Article;
 import com.example.downloaderdemo.util.QueryPreferences;
 import com.example.downloaderdemo.util.QuerySuggestionProvider;
 import com.example.downloaderdemo.util.Utils;
+import com.squareup.otto.Subscribe;
 
 import java.util.ArrayList;
 
@@ -72,13 +75,13 @@ public class ArticleListFragment extends BaseFragment{
     private ListItemAdapter mAdapter;
     private RecyclerView mRecyclerView;
     private TextView mEmptyView;
+    private ProgressBar mInProgress;
     private LinearLayoutManager mLayoutManager;
     private String mQuery;
     private boolean mFirstTimeIn = true;
     private View mView;
     private int mChoiceMode;
     private boolean mIsDualPane;
-    //private boolean mInitialView = true;
 
     // endless scrolling variables
     private boolean mLoading = true;
@@ -121,6 +124,7 @@ public class ArticleListFragment extends BaseFragment{
         mView = inflater.inflate(R.layout.recycler_view, container, false);
         mEmptyView = (TextView) mView.findViewById(R.id.empty_view);
         mRecyclerView = (RecyclerView) mView.findViewById(R.id.recycler_view);
+        mInProgress = (ProgressBar) mView.findViewById(R.id.in_progress);
 
         mLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(mLayoutManager);
@@ -196,6 +200,7 @@ public class ArticleListFragment extends BaseFragment{
         mSearchView.setSubmitButtonEnabled(true);
         mSearchView.setQueryRefinementEnabled(true);
         mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+
             @Override
             public boolean onQueryTextSubmit(String query) {
 
@@ -256,8 +261,9 @@ public class ArticleListFragment extends BaseFragment{
             if(mQuery != null) {
                 // post a query, which will be executed by the thread
                 postToAppBus(new QueryEvent(mQuery));
+                mEmptyView.setVisibility(View.GONE);
                 if(mAdapter.getItemCount() == 0) {
-                    mEmptyView.setVisibility(View.GONE);
+                    mInProgress.setVisibility(View.VISIBLE);
                     mRecyclerView.setVisibility(View.GONE);
                 }
             } else {
@@ -280,13 +286,14 @@ public class ArticleListFragment extends BaseFragment{
         }
         else {
             // no records to show
-            mEmptyView.setVisibility(View.VISIBLE);
-            mRecyclerView.setVisibility(View.GONE);
             if(mFirstTimeIn) {
+                mEmptyView.setVisibility(View.VISIBLE);
+                mRecyclerView.setVisibility(View.GONE);
                 Utils.showSnackbar(mView, "No results available in the database");
             }
         }
         mFirstTimeIn = false;
+        mInProgress.setVisibility(View.GONE);
     }
 
 
@@ -298,6 +305,15 @@ public class ArticleListFragment extends BaseFragment{
         }
     }
 
+
+    @Subscribe
+    public void getMessage(MessageEvent event) {
+        if(event.getMessage().equals(MessageEvent.NO_RESULTS_RETURNED_FROM_QUERY)) {
+            mEmptyView.setVisibility(View.VISIBLE);
+            mRecyclerView.setVisibility(View.GONE);
+            Utils.showSnackbar(mView, "No results available");
+        }
+    }
 
     // use DialogFragment from the support lib since the fragment is also from the support library
     public static class ConfirmationDialogFragment extends android.support.v4.app.DialogFragment {

@@ -5,21 +5,6 @@
         android:pivotY="50%"
         android:toDegrees="360">
 
-    <!--<shape-->
-        <!--android:innerRadiusRatio="3"-->
-        <!--android:shape="ring"-->
-        <!--android:thicknessRatio="8"-->
-        <!--android:useLevel="false">-->
-        <!--<gradient-->
-            <!--android:centerColor="#4c737373"-->
-            <!--android:centerY="0.50"-->
-            <!--android:endColor="@color/colorPrimary"-->
-            <!--android:startColor="#4c737373"-->
-            <!--android:type="sweep"-->
-            <!--android:useLevel="false"/>-->
-    <!--</shape>-->
-
-
     <shape
         android:innerRadiusRatio="3"
         android:shape="ring"
