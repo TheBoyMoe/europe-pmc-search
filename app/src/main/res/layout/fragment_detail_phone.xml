@@ -7,7 +7,6 @@
     <!--android:layout_height="wrap_content"-->
     <!--android:background="@color/colorPrimaryBackground">-->
 
-
 <!-- TRANSITIONS DO NOT WORK WITH NESTED SCROLL VIEW  -->
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -235,7 +234,7 @@
             android:paddingEnd="@dimen/dimen_large"
             android:paddingBottom="@dimen/dimen_large"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="match_parent">
 
             <TextView
                 android:text="@string/abstract_label"
