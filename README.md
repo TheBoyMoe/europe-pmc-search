@@ -1,7 +1,7 @@
 Europe PMC Search
 =====================================
 
-Search the Europe PMC database, which includes over 30 million publications from various sources, including PubMed, AGRICOLA, and the European Patent Office. Uses the Europe PMC's Restful API: https://europepmc.org/RestfulWebService
+Android app that allows the user to search the Europe PMC database. The database includes over 30 million publications from various sources, including PubMed, AGRICOLA, and the European Patent Office. Uses the Europe PMC's Restful API: https://europepmc.org/RestfulWebService
 
 Design of the app was inspired by the Sunshine app, used in Udacity's Andvanced Android App Devlopment course https://www.udacity.com/course/advanced-android-app-development--ud855.
 
