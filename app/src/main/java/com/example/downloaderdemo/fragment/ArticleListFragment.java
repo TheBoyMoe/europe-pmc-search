@@ -146,7 +146,7 @@ public class ArticleListFragment extends BaseFragment{
             mLoading = savedInstanceState.getBoolean(SAVED_LOADING);
             mQuery = savedInstanceState.getString(SAVED_QUERY);
             mFirstTimeIn = savedInstanceState.getBoolean(SAVED_FIRST_TIME_IN);
-            mAdapter.onRestoreInstanceState(savedInstanceState);
+            mAdapter.onRestoreInstanceState(savedInstanceState); // restore choice
         }
 
         // implement endless scrolling
@@ -184,7 +184,7 @@ public class ArticleListFragment extends BaseFragment{
         outState.putBoolean(SAVED_LOADING, mLoading);
         outState.putString(SAVED_QUERY, mQuery);
         outState.putBoolean(SAVED_FIRST_TIME_IN, mFirstTimeIn);
-        mAdapter.onSaveInstanceState(outState);
+        mAdapter.onSaveInstanceState(outState); // save choice
     }
 
 

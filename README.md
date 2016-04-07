@@ -20,9 +20,9 @@ This sample uses the Gradle build system. To build this project, use the
 Screenshots
 -----------
 
-![Phone](screenshots/phone_interaction.gif "Interacting with the app on a phone")
+![Phone](screenshots/phone_preview.gif "Interacting with the app on a phone")
 
-![Tablet](screenshots/tablet_screenshot.png "Tabletscreenshot")
+![Tablet](screenshots/tablet_preview_land.gif "Interacting with the app on a tablet")
 
 MIT License
 -----------
